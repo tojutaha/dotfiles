@@ -88,10 +88,10 @@ require('packer').startup(function(use)
   --use { -- Github Copilot
   --  'github/copilot.vim'
   --}
-  
-  --use { -- chatGPT text to colorscheme
-  --  'svermeulen/text-to-colorscheme.nvim'
-  --}
+
+  use { -- chatGPT text to colorscheme
+    'svermeulen/text-to-colorscheme.nvim'
+  }
 
   use { -- ripgrep
     'duane9/nvim-rg',
@@ -102,6 +102,10 @@ require('packer').startup(function(use)
     'nvim-lua/completion-nvim'
   }
 
+  use { --dap
+    "mfussenegger/nvim-dap",
+    "jay-babu/mason-nvim-dap.nvim",
+  }
 --[[
   use { -- ulti-snips
     'SirVer/ultisnips'
@@ -124,28 +128,24 @@ require('packer').startup(function(use)
     'gzagatti/vim-leuven-theme'
   }
 
-  use { -- searchbox
-    'VonHeikemen/searchbox.nvim',
-    requires = {
-      {'MunifTanjim/nui.nvim'}
-    }
-  }
-
   use { -- pandoc
     'aspeddro/pandoc.nvim'
   }
 
-vim.o.background = "dark";
---require('text-to-colorscheme').setup {
---    ai = {
---        openai_api_key = "",
---        gpt_model = "gpt-3.5-turbo-0613";
---    },
---}
+--  use { -- markdown-preview
+--    "iamcco/markdown-preview.nvim",
+--  }
 
-vim.keymap.set('n', '<leader>s', ':SearchBoxIncSearch<CR>')
-vim.keymap.set('n', '<leader>qr', ':SearchBoxReplace confirm=menu<CR>')
-vim.keymap.set('n', '<leader>qre', ':SearchBoxReplace confirm=menu exact=true<CR>')
+vim.o.background = "dark";
+require('text-to-colorscheme').setup {
+    ai = {
+        openai_api_key = os.getenv("OPENAI_API_KEY"),
+        gpt_model = "gpt-3.5-turbo-0613";
+    },
+}
+
+-- Floaterm
+vim.keymap.set('n', '<leader>T', ':FloatermNew<CR>')
 
 -- Saves the current file and then runs it with Python
 --local RunPython = function()
@@ -160,7 +160,17 @@ vim.keymap.set('n', '<leader>qre', ':SearchBoxReplace confirm=menu exact=true<CR
 
 local Build = function()
     vim.cmd(':copen')
-    vim.cmd(':AsyncRun build.bat')
+
+    local is_windows = vim.fn.has('win32') == 1
+    local build_cmd = is_windows and 'build.bat' or 'build.sh'
+    if is_windows then
+      vim.cmd(':AsyncRun' .. build_cmd)
+    else
+      vim.cmd(':AsyncRun ./' .. build_cmd)
+    end
+
+    --vim.cmd(':AsyncRun build.bat')
+    vim.cmd(':AsyncRun ' .. build_cmd)
 end
 
 local OpenUE = function()
@@ -227,7 +237,7 @@ vim.keymap.set('n', '<F4>', function() ui.nav_file(4) end)
         config = function()
         require("zen-mode").setup {
           window = {
-  		    backdrop = 0.5,
+  		    backdrop = 1.0,
   		    width = 0.85,
         }
       }
@@ -246,6 +256,7 @@ vim.keymap.set('n', '<F4>', function() ui.nav_file(4) end)
   use("folke/tokyonight.nvim")
   use{"catppuccin/nvim", as = "catppuccin"}
   use("Shatur/neovim-ayu")
+  use("blazkowolf/gruber-darker.nvim")
 
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
@@ -296,16 +307,9 @@ end
 -- [[ Setting options ]]
 -- See `:help vim.o`
 
--- configure to use system clipboard
-vim.o.clipboard = "unnamedplus"
-
 -- Set highlight on search
 vim.o.hlsearch = false
 vim.o.incsearch = true
-
--- Transparency
-vim.api.nvim_set_hl(0, "Normal", { ctermbg = "None", bg = "None" })
-vim.api.nvim_set_hl(0, "NormalFloat", { ctermbg = "None", bg = "None" })
 
 -- Make line numbers default
 vim.wo.number = true
@@ -343,8 +347,30 @@ vim.wo.signcolumn = 'yes'
 vim.o.termguicolors = true
 --vim.cmd [[colorscheme ghdark]]
 --vim.cmd [[colorscheme lightning]]
-vim.cmd [[colorscheme gruvbox]]
+--vim.cmd [[colorscheme gruvbox]]
+--vim.cmd [[colorscheme ayu]]
+vim.cmd [[colorscheme rose-pine]]
 vim.cmd [[highlight clear signcolumn]]
+-- Transparency
+vim.g.is_transparent = 0
+function ToggleTransparency()
+  if vim.g.is_transparent == 0 then
+    -- Set the background to transparent
+    vim.cmd [[highlight clear signcolumn]]
+    vim.cmd("highlight Normal guibg=none")
+    vim.cmd("highlight NormalNC guibg=none")
+    vim.cmd("highlight NonText guibg=none")
+    vim.cmd("highlight Normal ctermbg=none")
+    vim.cmd("highlight NormalNC ctermbg=none")
+    vim.cmd("highlight NonText ctermbg=none")
+    vim.g.is_transparent = 1
+  else
+    -- Reset the background color
+    vim.cmd('set background=dark')
+    vim.g.is_transparent = 0
+  end
+end
+vim.api.nvim_set_keymap('n', '<F11>', ':lua ToggleTransparency()<CR>', {noremap=true, silent=true})
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
@@ -393,7 +419,6 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 require('lualine').setup {
   options = {
     icons_enabled = false,
-    --theme = 'rose-pine',
     component_separators = '|',
     section_separators = '',
   },
@@ -404,11 +429,11 @@ require('Comment').setup()
 
 -- Enable `lukas-reineke/indent-blankline.nvim`
 -- See `:help indent_blankline.txt`
-require('indent_blankline').setup {
-  char = '',
-  --char = '┊',
-  show_trailing_blankline_indent = false,
-}
+--require('indent_blankline').setup {
+--  char = '',
+--  --char = '┊',
+--  show_trailing_blankline_indent = false,
+--}
 
 -- Gitsigns
 -- See `:help gitsigns.txt`
@@ -603,24 +628,78 @@ lspconfig.clangd.setup(
         "clangd",
         "--background-index",
         --"--suggest-missing-includes",
-        "--clang",
-        --"--clang-tidy"
+        --"--clang",
+        "--clang-tidy",
         "-Wall",
         --"--header-insertion=iwyu"
     }
 })
-vim.lsp.handlers['textDocument/publishDiagnostics'] = function()
-end
+
+--vim.lsp.handlers['textDocument/publishDiagnostics'] = function()
+vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
+  vim.lsp.diagnostic.on_publish_diagnostics, {
+    virtual_text = true,
+    signs = true,
+    underline = true,
+    update_in_insert = true,
+    }
+)
+
+local default_capabilities = {
+  textDocument = {
+    completion = {
+      editsNearCursor = true,
+    },
+  },
+  offsetEncoding = {'utf-8', 'utf-16' },
+}
+
+require'lspconfig'.glslls.setup {
+  cmd = { 'glslls' }, -- GLSL lsp executable from (https://github.com/svenstaro/glsl-language-server)
+  filetypes = {'glsl'},
+  single_file_support = true,
+  capabilities = default_capabilities,
+}
 
 -- Setup neovim lua configuration
 require('neodev').setup()
---
+
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Setup mason so it can manage external tooling
 require('mason').setup()
+
+-- Setup dap
+require('mason-nvim-dap').setup ({
+    ensure_installed = {'cpptools'}
+})
+
+local dap = require("dap")
+dap.adapters.cpptools = {
+    type = 'executable',
+    name = 'cpptools',
+    command = vim.fn.stdpath('data') .. '/mason/bin/OpenDebugAD7',
+    args = {},
+    attach = {
+        pidProperty = "processId",
+        pidSelect = "ask"
+    },
+}
+
+dap.configurations.cpp = {
+    {
+        name = "Launch",
+        type = "cpptools",
+        request = "launch",
+        program = '${workspaceFolder}/array.bin',
+        cwd = '${workspaceFolder}',
+        stopOnEntry = true,
+        args = {},
+        runInTerminal = false,
+    },
+}
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
@@ -634,6 +713,9 @@ mason_lspconfig.setup_handlers {
     require('lspconfig')[server_name].setup {
       capabilities = capabilities,
       on_attach = on_attach,
+      flags = {
+        debounce_text_changes = 150
+      },
       settings = servers[server_name],
     }
   end,
