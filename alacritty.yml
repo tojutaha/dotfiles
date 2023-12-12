@@ -41,8 +41,8 @@ window:
   # Values for `decorations` (macOS only):
   #     - buttonless: Title bar, transparent background and title bar buttons
   #     - transparent: Title bar, transparent background, but no title bar buttons
-  decorations: full
-
+  decorations: Full
+  opacity: 0.85
   # Startup Mode (changes require restart)
   #
   # Values for `startup_mode`:
@@ -85,7 +85,6 @@ scrolling:
 # change the `it` value in terminfo when altering this setting.
 tabspaces: 8
 
-background_opacity: 1
 # Display the time it takes to redraw each frame.
 debug.render_timer: false
 
@@ -97,9 +96,10 @@ draw_bold_text_with_bright_colors: true
 
 #colors:
 import:
-   - ~/.config/alacritty/themes/themes/ayu_dark.yaml
+   #- ~/.config/alacritty/themes/themes/ayu_dark.yaml
    #- ~/.config/alacritty/themes/themes/gruvbox_dark.yaml
-   #- ~/.config/alacritty/themes/themes/rose-pine.yaml
+   - ~/.config/alacritty/themes/themes/rose-pine.yaml
+
 cursor:
     shape: Block
     blinking: true
@@ -113,5 +113,8 @@ selection:
 
 live_config_reload: true
 
-shell:
-  program: /usr/bin/zsh
+key_bindings:
+  - { key: Return,   mods: Alt,           action: ToggleFullscreen }
+
+  #shell:
+  #program: /usr/bin/zsh
