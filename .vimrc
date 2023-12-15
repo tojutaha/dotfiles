@@ -239,6 +239,7 @@ if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
   Plug 'junegunn/fzf.vim'
   Plug 'bfrg/vim-cpp-modern'
   Plug 'ervandew/supertab'
+  Plug 'zackhsi/fzf-tags'
   call plug#end()
 
 else
@@ -325,6 +326,7 @@ if has('win32')
     " noremap <silent> <A-b> :echo system(findfile('build.bat', ';'))<CR>
     :let g:asyncrun_open = 8
     noremap <silent> <A-b> :AsyncRun Build.bat<CR>
+    noremap <silent> <A-t> :AsyncRun GenerateTags.bat<CR>
 endif
 
 nmap <leader>2 :set paste<CR>i
@@ -335,13 +337,16 @@ noremap <C-p> <C-b>
 
 " Fuzzy finder
 map <leader>sf :FZF<CR>
-map <leader>sg :Rg<CR>
+"map <leader>sg :Rg<CR>
+map <leader>sg :Tags<CR>
+map <leader>/ :BTags<CR>
 
 " Coc Goto
 " nmap gd <Plug>(coc-definition)
 " nmap gr <Plug>(coc-references)
 "inoremap <Tab> <Plug>(coc-completion)
 "inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+let g:coc_enabled = 0
 
 " CTags
 " nnoremap gd <C-]>
