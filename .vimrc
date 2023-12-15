@@ -26,6 +26,8 @@ set showmode
 
 set tabstop=4
 
+set splitright
+
 "#######################################################################
 
 " disable visual bell (also disable in .inputrc)
@@ -55,10 +57,13 @@ if v:version >= 800
 endif
 
 " mark trailing spaces as errors
-match IncSearch '\s\+$'
+" match IncSearch '\s\+$'
 
 "
 set termguicolors
+colorscheme ghdark
+
+"
 
 " enough for line numbers + gutter within 80 standard
 set textwidth=72
@@ -103,20 +108,11 @@ set shortmess=aoOtTI
 " prevents truncated yanks, deletes, etc.
 set viminfo='20,<1000,s1000
 
-" not a fan of bracket matching or folding
-if has("eval") " vim-tiny detection
-  let g:loaded_matchparen=1
-endif
-set noshowmatch
+set backspace=indent,eol,start
 
 " wrap around when searching
 set wrapscan
 set nowrap
-
-" Just the formatoptions defaults, these are changed per filetype by
-" plugins. Most of the utility of all of this has been superceded by the use of
-" modern simplified pandoc for capturing knowledge source instead of 
-" arbitrary raw text files.
 
 set fo-=t   " don't auto-wrap text using text width
 set fo+=c   " autowrap comments using textwidth with leader
@@ -136,22 +132,11 @@ set fo+=M   " don't add space before or after multi-byte char
 set fo-=B   " don't add space between two multi-byte chars
 set fo+=1   " don't break a line after a one-letter word
 
-" requires PLATFORM env variable set (in ~/.bashrc)
-if $PLATFORM == 'mac'
-  " required for mac delete to work
-  set backspace=indent,eol,start
-endif
-
 " stop complaints about switching buffer with changes
 set hidden
 
 " command history
 set history=100
-
-" here because plugins and stuff need it
-if has("syntax")
-  syntax enable
-endif
 
 " faster scrolling
 set ttyfast
@@ -184,37 +169,42 @@ hi IncSearch ctermbg=236 cterm=NONE ctermfg=darkred
 hi MatchParen ctermbg=236 ctermfg=darkred
 
 " color overrides
-au FileType * hi StatusLine ctermfg=black ctermbg=NONE
-au FileType * hi StatusLineNC ctermfg=black ctermbg=NONE
-au FileType * hi Normal ctermbg=NONE
-au FileType * hi Special ctermfg=cyan
-au FileType * hi LineNr ctermfg=black ctermbg=NONE
-au FileType * hi SpecialKey ctermfg=black ctermbg=NONE
-au FileType * hi ModeMsg ctermfg=black cterm=NONE ctermbg=NONE
-au FileType * hi MoreMsg ctermfg=black ctermbg=NONE
-au FileType * hi NonText ctermfg=black ctermbg=NONE
-au FileType * hi vimGlobal ctermfg=black ctermbg=NONE
-au FileType * hi goComment ctermfg=black ctermbg=NONE
-au FileType * hi ErrorMsg ctermbg=234 ctermfg=darkred cterm=NONE
-au FileType * hi Error ctermbg=234 ctermfg=darkred cterm=NONE
-au FileType * hi SpellBad ctermbg=234 ctermfg=darkred cterm=NONE
-au FileType * hi SpellRare ctermbg=234 ctermfg=darkred cterm=NONE
-au FileType * hi Search ctermbg=236 ctermfg=darkred
-au FileType * hi vimTodo ctermbg=236 ctermfg=darkred
-au FileType * hi Todo ctermbg=236 ctermfg=darkred
-au FileType * hi IncSearch ctermbg=236 cterm=NONE ctermfg=darkred
-au FileType * hi MatchParen ctermbg=236 ctermfg=darkred
-au FileType markdown,pandoc hi Title ctermfg=yellow ctermbg=NONE
-au FileType markdown,pandoc hi Operator ctermfg=yellow ctermbg=NONE
-au FileType markdown,pandoc set tw=0
-au FileType yaml hi yamlBlockMappingKey ctermfg=NONE
-au FileType yaml set sw=2
-au FileType bash set sw=2
-au FileType c set sw=8
-au FileType markdown,pandoc noremap j gj
-au FileType markdown,pandoc noremap k gk
-
+"au FileType * hi StatusLine ctermfg=black ctermbg=NONE
+"au FileType * hi StatusLineNC ctermfg=black ctermbg=NONE
+"au FileType * hi Normal ctermbg=NONE
+"au FileType * hi Special ctermfg=cyan
+"au FileType * hi LineNr ctermfg=black ctermbg=NONE
+"au FileType * hi SpecialKey ctermfg=black ctermbg=NONE
+"au FileType * hi ModeMsg ctermfg=black cterm=NONE ctermbg=NONE
+"au FileType * hi MoreMsg ctermfg=black ctermbg=NONE
+"au FileType * hi NonText ctermfg=black ctermbg=NONE
+"au FileType * hi vimGlobal ctermfg=black ctermbg=NONE
+"au FileType * hi goComment ctermfg=black ctermbg=NONE
+"au FileType * hi ErrorMsg ctermbg=234 ctermfg=darkred cterm=NONE
+"au FileType * hi Error ctermbg=234 ctermfg=darkred cterm=NONE
+"au FileType * hi SpellBad ctermbg=234 ctermfg=darkred cterm=NONE
+"au FileType * hi SpellRare ctermbg=234 ctermfg=darkred cterm=NONE
+"au FileType * hi Search ctermbg=236 ctermfg=darkred
+"au FileType * hi vimTodo ctermbg=236 ctermfg=darkred
+"au FileType * hi Todo ctermbg=236 ctermfg=darkred
+"au FileType * hi IncSearch ctermbg=236 cterm=NONE ctermfg=darkred
+"au FileType * hi MatchParen ctermbg=236 ctermfg=darkred
+"au FileType markdown,pandoc hi Title ctermfg=yellow ctermbg=NONE
+"au FileType markdown,pandoc hi Operator ctermfg=yellow ctermbg=NONE
+"au FileType markdown,pandoc set tw=0
+"au FileType yaml hi yamlBlockMappingKey ctermfg=NONE
+"au FileType yaml set sw=2
+"au FileType bash set sw=2
+"au FileType c set sw=8
+"au FileType markdown,pandoc noremap j gj
+"au FileType markdown,pandoc noremap k gk
+au Syntax c source $HOME/vimfiles/syntax/c.vim
+au Syntax cpp source $HOME/vimfiles/syntax/c.vim
+syntax enable
 set cinoptions+=:0
+
+filetype plugin on
+set omnifunc=syntaxcomplete#Complete
 
 " Edit/Reload vimrc configuration file
 nnoremap confe :e $HOME/.vimrc<CR>
@@ -223,18 +213,17 @@ nnoremap confr :source $HOME/.vimrc<CR>
 set ruf=%30(%=%#LineNr#%.50F\ [%{strlen(&ft)?&ft:'none'}]\ %l:%c\ %p%%%)
 
 " only load plugins if Plug detected
-if filereadable(expand("~/.vim/autoload/plug.vim"))
+" if filereadable(expand("~/.vim/autoload/plug.vim"))
+if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
 
   " github.com/junegunn/vim-plug
 
   call plug#begin('~/.local/share/vim/plugins')
   Plug 'zah/nim.vim'
   Plug 'conradirwin/vim-bracketed-paste'
-  Plug 'morhetz/gruvbox'
   Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
   Plug 'vim-pandoc/vim-pandoc'
   Plug 'rwxrob/vim-pandoc-syntax-simple'
-  Plug 'mmai/vim-zenmode'
   Plug 'preservim/nerdtree'
   call plug#end()
 
@@ -242,79 +231,19 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   call plug#begin('~/.vim/plugged')
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'mattn/emmet-vim'
-  Plug 'SirVer/ultisnips'
-  Plug 'honza/vim-snippets'
+  Plug 'skywind3000/asyncrun.vim'
+  Plug 'mmai/vim-zenmode'
+  "Plug 'SirVer/ultisnips'
+  "Plug 'honza/vim-snippets'
   Plug 'junegunn/fzf', {'do': {-> fzf#install()}}
   Plug 'junegunn/fzf.vim'
+  Plug 'bfrg/vim-cpp-modern'
+  Plug 'ervandew/supertab'
   call plug#end()
 
-  " pandoc
-  let g:pandoc#formatting#mode = 'h' " A'
-  let g:pandoc#formatting#textwidth = 72
-
-  " golang
-  let g:go_fmt_fail_silently = 0
-  let g:go_fmt_command = 'goimports'
-  let g:go_fmt_autosave = 1
-  let g:go_gopls_enabled = 1
-  let g:go_highlight_types = 1
-  let g:go_highlight_fields = 1
-  let g:go_highlight_functions = 1
-  let g:go_highlight_function_calls = 1
-  let g:go_highlight_operators = 1
-  let g:go_highlight_extra_types = 1
-  let g:go_highlight_variable_declarations = 1
-  let g:go_highlight_variable_assignments = 1
-  let g:go_highlight_build_constraints = 1
-  let g:go_highlight_diagnostic_errors = 1
-  let g:go_highlight_diagnostic_warnings = 1
-  "let g:go_auto_type_info = 1 " forces 'Press ENTER' too much
-  let g:go_auto_sameids = 0
-  "let g:go_metalinter_command='golangci-lint'
-  "let g:go_metalinter_command='golint'
-  "let g:go_metalinter_autosave=1
-  set updatetime=100
-  "let g:go_gopls_analyses = { 'composites' : v:false }
-  au FileType go nmap <leader>m ilog.Print("made")<CR><ESC>
-  au FileType go nmap <leader>n iif err != nil {return err}<CR><ESC>
 else
   autocmd vimleavepre *.go !gofmt -w % " backup if fatih fails
 endif
-
-" format perl on save
-if has("eval") " vim-tiny detection
-fun! s:Perltidy()
-  let l:pos = getcurpos()
-  silent execute '%!perltidy -i=2'
-  call setpos('.', l:pos)
-endfun
-"autocmd FileType perl autocmd BufWritePre <buffer> call s:Perltidy()
-endif
-
-" format shell on save
-if has("eval") " vim-tiny detection
-" TODO check for shfmt and shellcheck before defining
-" FIXME stop from blowing away file when there is shell error
-fun! s:FormatShell()
-  let l:pos = getcurpos()
-  silent execute '%!shfmt'
-  call setpos('.', l:pos)
-endfun
-autocmd FileType sh autocmd BufWritePre <buffer> call s:FormatShell()
-endif
-
-"autocmd vimleavepre *.md !perl -p -i -e 's,(?<!\[)my `(\w+)` (package|module|repo|command|utility),[my `\1` \2](https://gitlab.com/rwxrob/\1),g' %
-
-" fill in empty markdown links with duck.com search
-" [some thing]() -> [some thing](https://duck.com/lite?kae=t&q=some thing)
-" s,/foo,/bar,g
-"autocmd vimleavepre *.md !perl -p -i -e 's,\[([^\]]+)\]\(\),[\1](https://duck.com/lite?kd=-1&kp=-1&q=\1),g' %
-
-"autocmd BufWritePost *.md silent !toemoji %
-"autocmd BufWritePost *.md silent !toduck %
-
-" fill in anything beginning with @ with a link to twitch to it
-"autocmd vimleavepre *.md !perl -p -i -e 's, @(\w+), [\\@\1](https://twitch.tv/\1),g' %
 
 " make Y consitent with D and C (yank til end)
 map Y y$
@@ -355,17 +284,6 @@ au bufnewfile,bufRead *.go set spell spellcapcheck=0
 au bufnewfile,bufRead commands.yaml set spell
 au bufnewfile,bufRead *.txt set spell
 
-"fix bork bash detection
-if has("eval")  " vim-tiny detection
-fun! s:DetectBash()
-    if getline(1) == '#!/usr/bin/bash' || getline(1) == '#!/bin/bash'
-        set ft=bash
-        set shiftwidth=2
-    endif
-endfun
-autocmd BufNewFile,BufRead * call s:DetectBash()
-endif
-
 " displays all the syntax rules for current position, useful
 " when writing vimscript syntax plugins
 if has("syntax")
@@ -377,10 +295,20 @@ function! <SID>SynStack()
 endfunc
 endif
 
+" Colors
+let g:colors = getcompletion('', 'color')
+func! NextColor()
+    let idx = index(g:colors, g:colors_name)
+    return (idx + 1 >= len(g:colors) ? g:colors[0] : g:colors[idx + 1])
+endfunc
+
+func! PrevColor()
+    let idx = index(g:colors, g:colors_name)
+    return (idx - 1 < 0 ? g:colors[-1] : g:colors[idx - 1])
+endfunc
 
 " start at last place you were editing
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
-"au BufWritePost ~/.vimrc so ~/.vimrc
 
 " functions keys
 map <F1> :set number!<CR> :set relativenumber!<CR>
@@ -389,23 +317,17 @@ set pastetoggle=<F3>
 map <F4> :set list!<CR>
 map <F5> :set cursorline!<CR>
 map <F7> :set spell!<CR>
+noremap <F9> :exe "colo " .. NextColor()<CR>:colorscheme<CR>
+noremap <F10> :exe "colo " .. PrevColor()<CR>:colorscheme<CR>
 map <F12> :set fdm=indent<CR>
 
+if has('win32')
+    " noremap <silent> <A-b> :echo system(findfile('build.bat', ';'))<CR>
+    :let g:asyncrun_open = 8
+    noremap <silent> <A-b> :AsyncRun Build.bat<CR>
+endif
+
 nmap <leader>2 :set paste<CR>i
-
-" disable arrow keys (vi muscle memory)
-" noremap <up> :echoerr "Umm, use k instead"<CR>
-" noremap <down> :echoerr "Umm, use j instead"<CR>
-" noremap <left> :echoerr "Umm, use h instead"<CR>
-" noremap <right> :echoerr "Umm, use l instead"<CR>
-" inoremap <up> <NOP>
-"  inoremap <down> <NOP>
-"  inoremap <left> <NOP>
-"  inoremap <right> <NOP>
-
-" better use of arrow keys, number increment/decrement
-" nnoremap <up> <C-a>
-" nnoremap <down> <C-x>
 
 " Better page down and page up
 noremap <C-n> <C-d>
@@ -416,16 +338,19 @@ map <leader>sf :FZF<CR>
 map <leader>sg :Rg<CR>
 
 " Coc Goto
-nmap gd <Plug>(coc-definition)
-nmap gr <Plug>(coc-references)
-
-" Set TMUX window name to name of file
-"au fileopened * !tmux rename-window TESTING
-
-" read personal/private vim configuration (keep last to override)
-set rtp^=~/.vimpersonal
-set rtp^=~/.vimprivate
-set rtp^=~/.vimwork
-
+" nmap gd <Plug>(coc-definition)
+" nmap gr <Plug>(coc-references)
 "inoremap <Tab> <Plug>(coc-completion)
-inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+"inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" CTags
+" nnoremap gd <C-]>
+function! FollowTag()
+    if !exists("w:tagbrowse")
+        vsplit
+        let w:tagbrowse=1
+    endif
+    execute "tag " . expand("<cword>")
+endfunction
+
+nnoremap gd :call FollowTag()<CR>
