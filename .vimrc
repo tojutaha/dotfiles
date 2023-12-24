@@ -13,6 +13,8 @@ set autoindent
 
 " automatically write files when changing when multiple files open
 set autowrite
+" and read
+set autoread
 
 " deactivate line numbers
 " set nonumber
@@ -61,7 +63,7 @@ endif
 
 "
 set termguicolors
-colorscheme ghdark
+colorscheme gruvbox
 
 "
 
@@ -229,24 +231,20 @@ if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
 
   "
   call plug#begin('~/.vim/plugged')
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  Plug 'mattn/emmet-vim'
+  "Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'skywind3000/asyncrun.vim'
-  Plug 'mmai/vim-zenmode'
-  "Plug 'SirVer/ultisnips'
-  "Plug 'honza/vim-snippets'
   Plug 'junegunn/fzf', {'do': {-> fzf#install()}}
   Plug 'junegunn/fzf.vim'
+  Plug 'zackhsi/fzf-tags'
   Plug 'bfrg/vim-cpp-modern'
   Plug 'ervandew/supertab'
-  Plug 'zackhsi/fzf-tags'
   call plug#end()
 
 else
   autocmd vimleavepre *.go !gofmt -w % " backup if fatih fails
 endif
 
-" make Y consitent with D and C (yank til end)
+" make Y consistent with D and C (yank til end)
 map Y y$
 
 " better command-line completion
@@ -296,6 +294,21 @@ function! <SID>SynStack()
 endfunc
 endif
 
+" Quickfix
+let g:quickfix_open = 0
+function! ToggleQuickFix()
+    if g:quickfix_open
+        let g:quickfix_open = 0
+        :cclose
+    else
+        let g:quickfix_open = 1
+        :copen
+    endif
+endfunction
+noremap <silent> <Leader>q :call ToggleQuickFix()<CR>
+noremap <silent> <A-n> :cn<CR>
+noremap <silent> <A-N> :cp<CR>
+
 " Colors
 let g:colors = getcompletion('', 'color')
 func! NextColor()
@@ -324,7 +337,6 @@ map <F12> :set fdm=indent<CR>
 
 if has('win32')
     " noremap <silent> <A-b> :echo system(findfile('build.bat', ';'))<CR>
-    :let g:asyncrun_open = 8
     noremap <silent> <A-b> :AsyncRun Build.bat<CR>
     noremap <silent> <A-t> :AsyncRun GenerateTags.bat<CR>
 endif
@@ -349,7 +361,6 @@ map <leader>/ :BTags<CR>
 let g:coc_enabled = 0
 
 " CTags
-" nnoremap gd <C-]>
 function! FollowTag()
     if !exists("w:tagbrowse")
         vsplit
@@ -358,4 +369,10 @@ function! FollowTag()
     execute "tag " . expand("<cword>")
 endfunction
 
-nnoremap gd :call FollowTag()<CR>
+" nnoremap gd :call FollowTag()<CR>
+nnoremap gd <C-]>
+
+" Move lines
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '<-2<CR>gv=gv
+
