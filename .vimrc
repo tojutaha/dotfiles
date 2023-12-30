@@ -206,7 +206,6 @@ syntax enable
 set cinoptions+=:0
 
 filetype plugin on
-set omnifunc=syntaxcomplete#Complete
 
 " Edit/Reload vimrc configuration file
 nnoremap confe :e $HOME/.vimrc<CR>
@@ -224,9 +223,6 @@ if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
   Plug 'zah/nim.vim'
   Plug 'conradirwin/vim-bracketed-paste'
   Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
-  Plug 'vim-pandoc/vim-pandoc'
-  Plug 'rwxrob/vim-pandoc-syntax-simple'
-  Plug 'preservim/nerdtree'
   call plug#end()
 
   "
@@ -237,12 +233,19 @@ if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
   Plug 'junegunn/fzf.vim'
   Plug 'zackhsi/fzf-tags'
   Plug 'bfrg/vim-cpp-modern'
+  "Plug 'mh21/errormarker.vim'
+  "Plug 'xolox/vim-misc'
+  "Plug 'xolox/vim-easytags'
+  Plug 'ludovicchabant/vim-gutentags'
   Plug 'ervandew/supertab'
   call plug#end()
 
 else
   autocmd vimleavepre *.go !gofmt -w % " backup if fatih fails
 endif
+
+" Error formatting
+"let &errorformat="%f:%l:%c: %t%*[^:]:%m,%f:%l: %t%*[^:]:%m," . &errorformat
 
 " make Y consistent with D and C (yank til end)
 map Y y$
@@ -255,6 +258,25 @@ nnoremap <C-L> :nohl<CR><C-L>
 
 " enable omni-completion
 set omnifunc=syntaxcomplete#Complete
+set omnifunc=ccomplete#Complete
+
+" get the parameters of a function and put it in a popup using ctags
+func GetFuncParamsFromTag()
+    silent write
+    " jump to tag under cursor
+    silent execute "normal \<c-]>"
+    " if there is '(' on the same line, it may be a function
+    if search('(', "n") == winsaveview()["lnum"]
+        " yank the function's name and parameters
+        silent execute "normal v/)\<cr>y\<c-t>"
+        " remove any previouslypresent popup
+        call popup_clear()
+        " make the popup spawn above/below the cursor
+        call popup_atcursor(getreg('0'), #{moved: [0, 80], highlight: 'WildMenu'})
+    endif
+endfunc
+
+nnoremap <silent> <leader>? :call GetFuncParamsFromTag()<cr>
 
 " force some files to be specific file type
 au bufnewfile,bufRead $SNIPPETS/md/* set ft=pandoc
@@ -352,6 +374,7 @@ map <leader>sf :FZF<CR>
 "map <leader>sg :Rg<CR>
 map <leader>sg :Tags<CR>
 map <leader>/ :BTags<CR>
+map <leader><Space> :Buffers<CR>
 
 " Coc Goto
 " nmap gd <Plug>(coc-definition)
