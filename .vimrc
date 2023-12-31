@@ -232,6 +232,8 @@ if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
   Plug 'junegunn/fzf', {'do': {-> fzf#install()}}
   Plug 'junegunn/fzf.vim'
   Plug 'zackhsi/fzf-tags'
+  Plug 'junegunn/limelight.vim'
+  Plug 'junegunn/goyo.vim'
   Plug 'bfrg/vim-cpp-modern'
   "Plug 'mh21/errormarker.vim'
   "Plug 'xolox/vim-misc'
@@ -342,6 +344,20 @@ func! PrevColor()
     let idx = index(g:colors, g:colors_name)
     return (idx - 1 < 0 ? g:colors[-1] : g:colors[idx - 1])
 endfunc
+
+" Zen Mode
+let g:zenmode_on = 0
+function! ToggleZenMode()
+    if g:zenmode_on
+        let g:zenmode_on = 0
+        :Goyo
+    else
+        let g:zenmode_on = 1
+        :Goyo 120x100%
+    endif
+endfunction
+
+noremap <silent> <Leader>zm :call ToggleZenMode()<CR>
 
 " start at last place you were editing
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
