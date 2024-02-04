@@ -28,8 +28,16 @@ require('packer').startup(function(use)
 
   use { -- Autocompletion
     'hrsh7th/nvim-cmp',
-    requires = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
+    requires = { 'hrsh7th/cmp-buffer',
+  --    'hrsh7th/cmp-path',
+      'hrsh7th/cmp-nvim-lsp',
+  --    'hrsh7th/cmp-nvim-lsp-signature-help',
+  --    'quangnguyen30192/cmp-nvim-ultisnips',
+  --    'L3MON4D3/LuaSnip',
+  --    'saadparwaiz1/cmp_luasnip'
+    },
   }
+
 
   use { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
@@ -102,10 +110,10 @@ require('packer').startup(function(use)
     'nvim-lua/completion-nvim'
   }
 
-  use { --dap
-    "mfussenegger/nvim-dap",
-    "jay-babu/mason-nvim-dap.nvim",
-  }
+  --use { --coc
+    --'neoclide/coc.nvim', branch = 'release', run = 'npm ci'
+  --}
+
 --[[
   use { -- ulti-snips
     'SirVer/ultisnips'
@@ -130,6 +138,14 @@ require('packer').startup(function(use)
 
   use { -- pandoc
     'aspeddro/pandoc.nvim'
+  }
+
+  use { --godbolt
+    'p00f/godbolt.nvim'
+  }
+
+  use { --disassemble
+    'mdedonno1337/disassemble.nvim'
   }
 
 --  use { -- markdown-preview
@@ -164,13 +180,13 @@ local Build = function()
     local is_windows = vim.fn.has('win32') == 1
     local build_cmd = is_windows and 'build.bat' or 'build.sh'
     if is_windows then
-      vim.cmd(':AsyncRun' .. build_cmd)
+      vim.cmd(':AsyncRun ' .. build_cmd)
     else
       vim.cmd(':AsyncRun ./' .. build_cmd)
     end
 
     --vim.cmd(':AsyncRun build.bat')
-    vim.cmd(':AsyncRun ' .. build_cmd)
+    --vim.cmd(':AsyncRun ' .. build_cmd)
 end
 
 local OpenUE = function()
@@ -323,7 +339,7 @@ vim.opt.expandtab = true
 vim.opt.smartindent = false
 vim.opt.wrap = false
 vim.opt.autoindent = false
-vim.opt.cindent = false 
+vim.opt.cindent = true
 
 -- Enable mouse mode
 vim.o.mouse = 'a'
@@ -349,7 +365,8 @@ vim.o.termguicolors = true
 --vim.cmd [[colorscheme lightning]]
 --vim.cmd [[colorscheme gruvbox]]
 --vim.cmd [[colorscheme ayu]]
-vim.cmd [[colorscheme rose-pine]]
+vim.cmd [[colorscheme ayu-dark]]
+--vim.cmd [[colorscheme rose-pine]]
 vim.cmd [[highlight clear signcolumn]]
 -- Transparency
 vim.g.is_transparent = 0
@@ -627,15 +644,17 @@ lspconfig.clangd.setup(
     cmd = {
         "clangd",
         "--background-index",
-        --"--suggest-missing-includes",
+        "--suggest-missing-includes",
         --"--clang",
         "--clang-tidy",
         "-Wall",
+        "--header-insertion=never"
         --"--header-insertion=iwyu"
     }
 })
 
---vim.lsp.handlers['textDocument/publishDiagnostics'] = function()
+vim.lsp.handlers['textDocument/publishDiagnostics'] = function()
+end
 vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
   vim.lsp.diagnostic.on_publish_diagnostics, {
     virtual_text = true,
@@ -671,36 +690,6 @@ capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 -- Setup mason so it can manage external tooling
 require('mason').setup()
 
--- Setup dap
-require('mason-nvim-dap').setup ({
-    ensure_installed = {'cpptools'}
-})
-
-local dap = require("dap")
-dap.adapters.cpptools = {
-    type = 'executable',
-    name = 'cpptools',
-    command = vim.fn.stdpath('data') .. '/mason/bin/OpenDebugAD7',
-    args = {},
-    attach = {
-        pidProperty = "processId",
-        pidSelect = "ask"
-    },
-}
-
-dap.configurations.cpp = {
-    {
-        name = "Launch",
-        type = "cpptools",
-        request = "launch",
-        program = '${workspaceFolder}/array.bin',
-        cwd = '${workspaceFolder}',
-        stopOnEntry = true,
-        args = {},
-        runInTerminal = false,
-    },
-}
-
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
 
@@ -713,9 +702,9 @@ mason_lspconfig.setup_handlers {
     require('lspconfig')[server_name].setup {
       capabilities = capabilities,
       on_attach = on_attach,
-      flags = {
-        debounce_text_changes = 150
-      },
+      --flags = {
+      --  debounce_text_changes = 150
+      --},
       settings = servers[server_name],
     }
   end,
@@ -726,7 +715,7 @@ require('fidget').setup()
 
 -- nvim-cmp setup
 local cmp = require 'cmp'
-local luasnip = require 'luasnip'
+--local luasnip = require 'luasnip'
 
 cmp.setup {
   snippet = {
@@ -742,30 +731,50 @@ cmp.setup {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-    --['<Tab>'] = cmp.mapping(function(fallback)
-    --  if cmp.visible() then
-    --    cmp.select_next_item()
-    --  elseif luasnip.expand_or_jumpable() then
-    --    luasnip.expand_or_jump()
-    --  else
-    --    fallback()
-    --  end
-    --end, { 'i', 's' }),
-    --['<S-Tab>'] = cmp.mapping(function(fallback)
-    --  if cmp.visible() then
-    --    cmp.select_prev_item()
-    --  elseif luasnip.jumpable(-1) then
-    --    luasnip.jump(-1)
-    --  else
-    --    fallback()
-    --  end
-    --end, { 'i', 's' }),
+    ['<Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+    ['<S-Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.jumpable(-1) then
+        luasnip.jump(-1)
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
   },
   sources = {
+    --{ name = 'buffer' },
+    --{ name = 'path' },
     { name = 'nvim_lsp' },
-    { name = 'luasnip' },
+    { name = 'nvim_lsp_signature_help' },
+    --{ name = 'luasnip' },
+    --{ name = 'ultisnips' },
   },
 }
+
+
+-- Godbolt
+require("godbolt").setup({
+    languages = {
+        cpp = { compiler = "g122", options = {} },
+        c = { compiler = "cg122", options = {} },
+        rust = { compiler = "r1650", options = {} },
+        -- any_additional_filetype = { compiler = ..., options = ... },
+    },
+    quickfix = {
+        enable = false, -- whether to populate the quickfix list in case of errors
+        auto_open = false -- whether to open the quickfix list in case of errors
+    },
+    url = "https://godbolt.org" -- can be changed to a different godbolt instance
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
