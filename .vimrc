@@ -30,6 +30,8 @@ set tabstop=4
 
 set splitright
 
+set ignorecase
+
 "#######################################################################
 
 " disable visual bell (also disable in .inputrc)
@@ -63,7 +65,8 @@ endif
 
 "
 set termguicolors
-colorscheme gruvbox
+colorscheme GruberDarker
+highlight VertSplit guifg=#181818 guibg=#181818 ctermfg=black ctermbg=black
 
 "
 
@@ -201,7 +204,7 @@ hi MatchParen ctermbg=236 ctermfg=darkred
 "au FileType markdown,pandoc noremap j gj
 "au FileType markdown,pandoc noremap k gk
 au Syntax c source $HOME/vimfiles/syntax/c.vim
-au Syntax cpp source $HOME/vimfiles/syntax/c.vim
+au Syntax cpp source $HOME/vimfiles/syntax/cpp.vim
 syntax enable
 set cinoptions+=:0
 
@@ -213,19 +216,31 @@ nnoremap confr :source $HOME/.vimrc<CR>
 
 set ruf=%30(%=%#LineNr#%.50F\ [%{strlen(&ft)?&ft:'none'}]\ %l:%c\ %p%%%)
 
+" cscope
+call plug#begin('~/.vim/plugged')
+Plug 'vim-scripts/cscope_macros.vim'
+call plug#end()
+if has('cscope')
+  set cscopetag cscopeverbose
+
+  if has('quickfix')
+    set cscopequickfix=s-,c-,d-,i-,t-,e-
+  endif
+
+  cnoreabbrev csa cs add
+  cnoreabbrev csf cs find
+  cnoreabbrev csk cs kill
+  cnoreabbrev csr cs reset
+  cnoreabbrev css cs show
+  cnoreabbrev csh cs help
+
+  command -nargs=0 Cscope cs add $VIMSRC/src/cscope.out $VIMSRC/src
+endif
+
 " only load plugins if Plug detected
 " if filereadable(expand("~/.vim/autoload/plug.vim"))
 if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
 
-  " github.com/junegunn/vim-plug
-
-  call plug#begin('~/.local/share/vim/plugins')
-  Plug 'zah/nim.vim'
-  Plug 'conradirwin/vim-bracketed-paste'
-  Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
-  call plug#end()
-
-  "
   call plug#begin('~/.vim/plugged')
   "Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'skywind3000/asyncrun.vim'
@@ -234,16 +249,14 @@ if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
   Plug 'zackhsi/fzf-tags'
   Plug 'junegunn/limelight.vim'
   Plug 'junegunn/goyo.vim'
-  Plug 'bfrg/vim-cpp-modern'
-  "Plug 'mh21/errormarker.vim'
-  "Plug 'xolox/vim-misc'
-  "Plug 'xolox/vim-easytags'
-  Plug 'ludovicchabant/vim-gutentags'
   Plug 'ervandew/supertab'
+  Plug 'vim-scripts/TagHighlight'
+  Plug 'mnishz/colorscheme-preview.vim'
+  Plug 'ayu-theme/ayu-vim'
+  Plug 'hari-rangarajan/CCTree'
+  "Plug 'yegappan/disassemble'
   call plug#end()
 
-else
-  autocmd vimleavepre *.go !gofmt -w % " backup if fatih fails
 endif
 
 " Error formatting
@@ -368,10 +381,53 @@ nmap <F2> :call <SID>SynStack()<CR>
 set pastetoggle=<F3>
 map <F4> :set list!<CR>
 map <F5> :set cursorline!<CR>
+map <F5> :!cscope -Rb<CR>:cs reset<CR><CR>
 map <F7> :set spell!<CR>
 noremap <F9> :exe "colo " .. NextColor()<CR>:colorscheme<CR>
 noremap <F10> :exe "colo " .. PrevColor()<CR>:colorscheme<CR>
-map <F12> :set fdm=indent<CR>
+" map <F12> :set fdm=indent<CR>
+
+" gvim options
+set gfn=Consolas:h12
+set guioptions -=m
+set guioptions -=T
+set guioptions -=r
+set guioptions -=L
+
+" toggle fullscreen mode by pressing F11
+noremap <f11> <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleFullscreen', 0)<cr>
+" toggle window transparency to 247 or 200 by pressing F12
+noremap <f12> <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "255,200")<cr>
+
+" Toggle guioptions with leader + m
+nnoremap <Leader>m :call ToggleGuiOptions()<CR>
+
+function! ToggleGuiOptions()
+    if &guioptions =~# 'T'
+        set guioptions-=T
+    else
+        set guioptions+=T
+    endif
+
+    if &guioptions =~# 'r'
+        set guioptions-=r
+    else
+        set guioptions+=r
+    endif
+
+    if &guioptions =~# 'L'
+        set guioptions-=L
+    else
+        set guioptions+=L
+    endif
+
+    if &guioptions =~# 'm'
+        set guioptions-=m
+    else
+        set guioptions+=m
+    endif
+
+endfunction
 
 if has('win32')
     " noremap <silent> <A-b> :echo system(findfile('build.bat', ';'))<CR>
@@ -397,7 +453,6 @@ map <leader><Space> :Buffers<CR>
 " nmap gr <Plug>(coc-references)
 "inoremap <Tab> <Plug>(coc-completion)
 "inoremap <silent><expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-let g:coc_enabled = 0
 
 " CTags
 function! FollowTag()
@@ -415,3 +470,4 @@ nnoremap gd <C-]>
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
 
+source $HOME/vimfiles/colors/vertsplit.vim
