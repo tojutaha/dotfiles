@@ -65,8 +65,13 @@ endif
 
 "
 set termguicolors
-colorscheme GruberDarker
-highlight VertSplit guifg=#181818 guibg=#181818 ctermfg=black ctermbg=black
+"colorscheme GruberDarker
+"let ayucolor = "light"
+"let ayucolor = "mirage"
+"let ayucolor = "dark"
+"colorscheme ayu
+colorscheme hybrid
+"highlight VertSplit guifg=#181818 guibg=#181818 ctermfg=black ctermbg=black
 
 "
 
@@ -255,6 +260,7 @@ if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
   Plug 'ayu-theme/ayu-vim'
   Plug 'hari-rangarajan/CCTree'
   "Plug 'yegappan/disassemble'
+  Plug 'mg979/vim-visual-multi', {'branch': 'master'}
   call plug#end()
 
 endif
@@ -388,11 +394,11 @@ noremap <F10> :exe "colo " .. PrevColor()<CR>:colorscheme<CR>
 " map <F12> :set fdm=indent<CR>
 
 " gvim options
-set gfn=Consolas:h12
-set guioptions -=m
-set guioptions -=T
-set guioptions -=r
-set guioptions -=L
+"set gfn=Consolas:h12
+"set guioptions -=m
+"set guioptions -=T
+"set guioptions -=r
+"set guioptions -=L
 
 " toggle fullscreen mode by pressing F11
 noremap <f11> <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleFullscreen', 0)<cr>
