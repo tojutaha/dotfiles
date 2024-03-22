@@ -261,9 +261,12 @@ if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
   Plug 'hari-rangarajan/CCTree'
   "Plug 'yegappan/disassemble'
   Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+  Plug 'tikhomirov/vim-glsl'
   call plug#end()
 
 endif
+
+autocmd! BufNewFile,BufRead *.vs,*.fs,*.glsl set ft=glsl
 
 " Error formatting
 "let &errorformat="%f:%l:%c: %t%*[^:]:%m,%f:%l: %t%*[^:]:%m," . &errorformat
