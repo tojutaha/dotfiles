@@ -324,6 +324,7 @@ if vim.fn.has('win32') == 1 then
 end
 
 -- Neovide
+if vim.g.neovide ~= nil then
 function _G.toggle_fullscreen()
     local is_fullscreen = vim.api.nvim_eval('g:neovide_fullscreen')
     if is_fullscreen == true then
@@ -332,7 +333,12 @@ function _G.toggle_fullscreen()
         vim.api.nvim_command('let g:neovide_fullscreen = v:true')
     end
 end
+
 vim.api.nvim_set_keymap('n', '<F11>', ':lua toggle_fullscreen()<CR>', {noremap = true, silent = true})
+
+vim.api.nvim_command('let g:neovide_scale_factor = 0.9')
+vim.api.nvim_command('let g:neovide_cursor_vfx_mode = "pixiedust"')
+end
 
 -- Keep signcolumn on by default
 vim.wo.signcolumn = 'no'
