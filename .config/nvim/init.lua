@@ -298,20 +298,53 @@ function _G.toggle_quickfix()
         vim.cmd('copen')
     end
 end
--- let g:quickfix_open = 0
--- function! ToggleQuickFix()
---     if g:quickfix_open
---         let g:quickfix_open = 0
---         :cclose
---     else
---         let g:quickfix_open = 1
---         :copen
---     endif
--- endfunction
 
 vim.keymap.set('n', '<leader>q', ':lua toggle_quickfix()<CR>', { desc = 'Open Quickfix' })
 vim.api.nvim_set_keymap('n', '<A-n>', ':cn<CR>', {noremap = true, silent = true})
 vim.api.nvim_set_keymap('n', '<A-N>', ':cp<CR>', {noremap = true, silent = true})
+
+-- Cycle through colorschemes
+vim.g.colors = vim.fn.getcompletion('', 'color')
+
+local function get_index(tbl, val)
+    for i, v in ipairs(tbl) do
+        if v == val then
+            return i
+        end
+    end
+    return nil
+end
+
+_G.NextColor = function()
+    local idx = get_index(vim.g.colors, vim.g.colors_name)
+    if idx == nil or idx + 1 > #vim.g.colors then
+        return vim.g.colors[1]
+    else
+        return vim.g.colors[idx + 1]
+    end
+end
+
+_G.PrevColor = function()
+    local idx = get_index(vim.g.colors, vim.g.colors_name)
+    if idx == nil or idx - 1 < 1 then
+        return vim.g.colors[#vim.g.colors]
+    else
+        return vim.g.colors[idx - 1]
+    end
+end
+
+vim.cmd([[
+function! NextColorWrapper()
+    return luaeval('_G.NextColor()')
+endfunction
+
+function! PrevColorWrapper()
+    return luaeval('_G.PrevColor()')
+endfunction
+]])
+
+vim.api.nvim_set_keymap('n', '<F9>', ':exe "colo " .. NextColorWrapper()<CR>:colorscheme<CR>', {noremap = true})
+vim.api.nvim_set_keymap('n', '<F10>', ':exe "colo " .. PrevColorWrapper()<CR>:colorscheme<CR>', {noremap = true})
 
 -- Move lines
 vim.api.nvim_set_keymap('v', 'J', ":m '>+1<CR>gv=gv", {noremap = true, silent = true})
@@ -353,6 +386,9 @@ vim.o.completeopt = 'menuone,noselect'
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
 vim.cmd [[colorscheme jellybeans]]
+
+-- Font
+vim.o.guifont = "Consolas:h14"
 
 -- [[ Basic Keymaps ]]
 
@@ -481,7 +517,8 @@ vim.defer_fn(function()
     -- You can specify additional Treesitter modules here: -- For example: -- playground = {--enable = true,-- },
     modules = {},
     highlight = { enable = true },
-    indent = { enable = true },
+    --indent = { enable = true },
+    indent = { disable = 'cpp' },
     incremental_selection = {
       enable = true,
       keymaps = {
