@@ -42,8 +42,10 @@ require('lazy').setup({
   'hari-rangarajan/CCTree',
   'mg979/vim-visual-multi',
 
+  'folke/zen-mode.nvim',
+
   -- Detect tabstop and shiftwidth automatically
-  'tpope/vim-sleuth',
+  --'tpope/vim-sleuth',
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -62,6 +64,13 @@ require('lazy').setup({
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
     },
+  },
+
+  {
+    'ray-x/lsp_signature.nvim',
+    event = 'VeryLazy',
+    opts = {},
+    config = function(_, opts) require'lsp_signature'.setup(opts) end
   },
 
   {
@@ -237,6 +246,13 @@ require('lazy').setup({
   -- { import = 'custom.plugins' },
 }, {})
 
+require('lsp_signature').setup({
+    bind = true,
+    handler_opts = {
+        border = "rounded"
+    }
+})
+
 require('lualine').setup {
     options = {
         icons_enabled = true,
@@ -259,7 +275,8 @@ require('lualine').setup {
     sections = {
         lualine_a = {'mode'},
         --lualine_b = {'branch', 'diff', 'diagnostics'},
-        lualine_b = {'diagnostics'},
+        --lualine_b = {'diagnostics'},
+        lualine_b = {},
         lualine_c = {'filename'},
         lualine_x = {'encoding', 'fileformat', 'filetype'},
         lualine_y = {'progress'},
@@ -267,7 +284,8 @@ require('lualine').setup {
     },
     inactive_sections = {
         lualine_a = {},
-        lualine_b = {'branch'},
+        --lualine_b = {'branch'},
+        lualine_b = {},
         lualine_c = {'filename'},
         lualine_x = {'location'},
         lualine_y = {},
@@ -317,6 +335,8 @@ vim.o.smartindent = true
 vim.api.nvim_set_keymap('n', '<F1>', ':set number!<CR>:set relativenumber!<CR>', {noremap = true, silent = true})
 --set pastetoggle=<F3>
 --map <F5> :set cursorline!<CR>
+
+vim.api.nvim_set_keymap('n', '<leader>z', ':ZenMode<CR>', {noremap = true, silent = true})
 
 -- Quickfix
 function is_quickfix_open()
@@ -429,7 +449,7 @@ vim.o.termguicolors = true
 vim.cmd [[colorscheme jellybeans]]
 
 -- Font
-vim.o.guifont = "Consolas:h14"
+vim.o.guifont = "Consolas:h15"
 
 -- [[ Basic Keymaps ]]
 
@@ -630,7 +650,8 @@ local on_attach = function(_, bufnr)
       desc = 'LSP: ' .. desc
     end
 
-    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+    --vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+    vim.keymap.set('n', keys, func, { desc = desc })
   end
 
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
