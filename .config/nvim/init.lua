@@ -246,6 +246,83 @@ require('lazy').setup({
   -- { import = 'custom.plugins' },
 }, {})
 
+-- Scope annotation
+local api = vim.api
+vim.g.annotate_scope_enabled = true
+
+function clear_virtual_text()
+    if not vim.g.annotate_scope_enabled then
+        return
+    end
+    local buf = api.nvim_get_current_buf()
+    -- Clear the previous virtual text
+    api.nvim_buf_clear_namespace(buf, -1, 0, -1)
+end
+
+function annotate_scope()
+    if not vim.g.annotate_scope_enabled then
+        return
+    end
+    local buf = api.nvim_get_current_buf()
+    local cursor = api.nvim_win_get_cursor(0)
+    local line = cursor[1]
+    --local col = cursor[2]
+    local lines = api.nvim_buf_get_lines(buf, 0, -1, false)
+    local scope_stack = {}
+
+    -- Clear the previous virtual text
+    api.nvim_buf_clear_namespace(buf, -1, 0, -1)
+
+    for i = 1, #lines do
+        for j = 1, #lines[i] do
+            local char = lines[i]:sub(j, j)
+            if char == '{' then
+                -- Push the current line and line number onto the scope stack
+                table.insert(scope_stack, {scope = lines[i-1], line = i})
+            elseif char == '}' then
+                if #scope_stack > 0 then
+                    -- Pop the last scope from the stack and remove leading whitespace
+                    local last_open_scope = table.remove(scope_stack)
+                    local scope = last_open_scope.scope:gsub("^%s*(.-)%s*$", "%1")
+                    local open_line = last_open_scope.line
+                    -- Add virtual text to the end of the line with the closing brace
+                    -- only if the cursor is between the lines of the opening and closing braces
+                    if line > open_line and line <= i then
+                        api.nvim_buf_set_virtual_text(buf, 0, i-1, {{'' .. scope, 'Comment'}}, {})
+                        --api.nvim_buf_set_virtual_text(buf, 0, i-1, {{'' .. scope, 'AnnotateColor'}}, {})
+                    end
+                end
+            end
+        end
+    end
+end
+
+function toggle_annotate_scope()
+    vim.g.annotate_scope_enabled = not vim.g.annotate_scope_enabled
+    local buf = api.nvim_get_current_buf()
+    api.nvim_buf_clear_namespace(buf, -1, 0, -1)
+end
+
+vim.api.nvim_exec([[
+  highlight AnnotateColor guifg=#ff0000
+  augroup AnnotateScope
+    autocmd!
+    autocmd CursorMoved,CursorMovedI,InsertLeave * lua clear_virtual_text()
+    autocmd CursorHold,CursorHoldI,InsertEnter * lua annotate_scope()
+  augroup END
+]], false)
+
+vim.api.nvim_set_keymap('n', '<F5>', ':lua toggle_annotate_scope()<CR>', {noremap = true})
+
+-- vim.api.nvim_exec([[
+--   augroup AnnotateScope
+--     autocmd!
+--     autocmd CursorMoved * lua clear_virtual_text()
+--     autocmd CursorHold * lua annotate_scope()
+--   augroup END
+-- ]], false)
+--
+
 require('lsp_signature').setup({
     bind = true,
     handler_opts = {
