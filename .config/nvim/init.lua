@@ -248,7 +248,8 @@ require('lazy').setup({
 
 -- Scope annotation
 local api = vim.api
-vim.g.annotate_scope_enabled = true
+local ns_id = vim.api.nvim_create_namespace("AnnotatePlugin")
+vim.g.annotate_scope_enabled = false
 
 function clear_virtual_text()
     if not vim.g.annotate_scope_enabled then
@@ -256,7 +257,7 @@ function clear_virtual_text()
     end
     local buf = api.nvim_get_current_buf()
     -- Clear the previous virtual text
-    api.nvim_buf_clear_namespace(buf, -1, 0, -1)
+    api.nvim_buf_clear_namespace(buf, ns_id, 0, -1)
 end
 
 function annotate_scope()
@@ -271,7 +272,7 @@ function annotate_scope()
     local scope_stack = {}
 
     -- Clear the previous virtual text
-    api.nvim_buf_clear_namespace(buf, -1, 0, -1)
+    api.nvim_buf_clear_namespace(buf, ns_id, 0, -1)
 
     for i = 1, #lines do
         for j = 1, #lines[i] do
@@ -288,7 +289,7 @@ function annotate_scope()
                     -- Add virtual text to the end of the line with the closing brace
                     -- only if the cursor is between the lines of the opening and closing braces
                     if line > open_line and line <= i then
-                        api.nvim_buf_set_virtual_text(buf, 0, i-1, {{'' .. scope, 'Comment'}}, {})
+                        api.nvim_buf_set_virtual_text(buf, ns_id, i-1, {{'' .. scope, 'Comment'}}, {})
                         --api.nvim_buf_set_virtual_text(buf, 0, i-1, {{'' .. scope, 'AnnotateColor'}}, {})
                     end
                 end
@@ -300,27 +301,27 @@ end
 function toggle_annotate_scope()
     vim.g.annotate_scope_enabled = not vim.g.annotate_scope_enabled
     local buf = api.nvim_get_current_buf()
-    api.nvim_buf_clear_namespace(buf, -1, 0, -1)
+    api.nvim_buf_clear_namespace(buf, ns_id, 0, -1)
 end
 
-vim.api.nvim_exec([[
-  highlight AnnotateColor guifg=#ff0000
-  augroup AnnotateScope
-    autocmd!
-    autocmd CursorMoved,CursorMovedI,InsertLeave * lua clear_virtual_text()
-    autocmd CursorHold,CursorHoldI,InsertEnter * lua annotate_scope()
-  augroup END
-]], false)
+-- vim.api.nvim_exec([[
+--   highlight AnnotateColor guifg=#ff0000
+--   augroup AnnotateScope
+--     autocmd!
+--     autocmd CursorMoved,CursorMovedI,InsertLeave * lua clear_virtual_text()
+--     autocmd CursorHold,CursorHoldI,InsertEnter * lua annotate_scope()
+--   augroup END
+-- ]], false)
 
 vim.api.nvim_set_keymap('n', '<F5>', ':lua toggle_annotate_scope()<CR>', {noremap = true})
 
--- vim.api.nvim_exec([[
---   augroup AnnotateScope
---     autocmd!
---     autocmd CursorMoved * lua clear_virtual_text()
---     autocmd CursorHold * lua annotate_scope()
---   augroup END
--- ]], false)
+vim.api.nvim_exec([[
+  augroup AnnotateScope
+    autocmd!
+    autocmd CursorMoved * lua clear_virtual_text()
+    autocmd CursorHold * lua annotate_scope()
+  augroup END
+]], false)
 --
 
 require('lsp_signature').setup({
@@ -523,7 +524,7 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
-vim.cmd [[colorscheme jellybeans]]
+vim.cmd [[colorscheme retrobox]]
 
 -- Font
 vim.o.guifont = "Consolas:h15"
