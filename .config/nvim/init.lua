@@ -524,7 +524,7 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
-vim.cmd [[colorscheme retrobox]]
+vim.cmd [[colorscheme doom-miramare]]
 
 -- Font
 vim.o.guifont = "Consolas:h15"
@@ -555,6 +555,13 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = highlight_group,
   pattern = '*',
 })
+
+-- Highlight search hits (Clear with ctrl+L)
+vim.o.hlsearch = true
+vim.o.incsearch = true
+vim.o.linebreak = true
+
+vim.api.nvim_set_keymap('n', '<C-L>', ':nohl<CR><C-L>', {noremap = true, silent = true})
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
