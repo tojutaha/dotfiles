@@ -3,6 +3,7 @@
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+vim.keymap.set('i', 'jj', '<Esc>')
 
 -- [[ Install `lazy.nvim` plugin manager ]]
 --    https://github.com/folke/lazy.nvim
@@ -33,6 +34,8 @@ require('lazy').setup({
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
 
+  -- 
+  'duane9/nvim-rg',
   'skywind3000/asyncrun.vim',
   'junegunn/fzf.vim',
   'zackhsi/fzf-tags',
@@ -223,12 +226,14 @@ require('lazy').setup({
     build = ':TSUpdate',
   },
 
+  -- Themes
   {
     "askfiy/visual_studio_code",
-    priority = 100,
-    config = function()
+    "rebelot/kanagawa.nvim",
+    --priority = 100,
+    --config = function()
       --vim.cmd([[colorscheme visual_studio_code]])
-    end
+    --end
   }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -381,6 +386,9 @@ require('lualine').setup {
 -- Set highlight on search
 vim.o.hlsearch = false
 
+-- Preview substitutions live, as you type
+--vim.opt.inccommand = "true"
+
 -- Make line numbers default
 vim.wo.number = true
 vim.wo.relativenumber = true
@@ -438,7 +446,8 @@ function _G.toggle_quickfix()
     end
 end
 
-vim.keymap.set('n', '<leader>q', ':lua toggle_quickfix()<CR>', { desc = 'Open Quickfix' })
+--vim.keymap.set('n', '<leader>q', ':lua toggle_quickfix()<CR>', { desc = 'Open Quickfix' })
+vim.api.nvim_set_keymap('n', '<leader>q', ':lua toggle_quickfix()<CR>', {noremap = true, silent = true, desc = 'Open Quickfix' })
 vim.api.nvim_set_keymap('n', '<A-n>', ':cn<CR>', {noremap = true, silent = true})
 vim.api.nvim_set_keymap('n', '<A-N>', ':cp<CR>', {noremap = true, silent = true})
 
@@ -508,7 +517,7 @@ end
 
 vim.api.nvim_set_keymap('n', '<F11>', ':lua toggle_fullscreen()<CR>', {noremap = true, silent = true})
 
-vim.api.nvim_command('let g:neovide_scale_factor = 0.9')
+vim.api.nvim_command('let g:neovide_scale_factor = 1.0')
 vim.api.nvim_command('let g:neovide_cursor_vfx_mode = "pixiedust"')
 end
 
@@ -524,10 +533,10 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
-vim.cmd [[colorscheme doom-miramare]]
+vim.cmd [[colorscheme kanagawa-dragon]]
 
 -- Font
-vim.o.guifont = "Consolas:h15"
+vim.o.guifont = "Consolas:h12"
 
 -- [[ Basic Keymaps ]]
 
@@ -538,6 +547,9 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
+-- Diagnostic settings
+vim.diagnostic.config({signs = false})
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous diagnostic message' })
@@ -635,16 +647,20 @@ local function telescope_live_grep_open_files()
     prompt_title = 'Live Grep in Open Files',
   }
 end
+
+local buildin = require("telescope.builtin")
 vim.keymap.set('n', '<leader>s/', telescope_live_grep_open_files, { desc = '[S]earch [/] in Open Files' })
-vim.keymap.set('n', '<leader>ss', require('telescope.builtin').builtin, { desc = '[S]earch [S]elect Telescope' })
-vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc = 'Search [G]it [F]iles' })
-vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
-vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
-vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
-vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
+vim.keymap.set('n', '<leader>ss', buildin.builtin, { desc = '[S]earch [S]elect Telescope' })
+vim.keymap.set('n', '<leader>gf', buildin.git_files, { desc = 'Search [G]it [F]iles' })
+vim.keymap.set('n', '<leader>sf', buildin.find_files, { desc = '[S]earch [F]iles' })
+vim.keymap.set('n', '<leader>sh', buildin.help_tags, { desc = '[S]earch [H]elp' })
+vim.keymap.set('n', '<leader>sk', buildin.keymaps, { desc = '[S]earch [K]eymaps' })
+vim.keymap.set('n', '<leader>st', buildin.tags, { desc = '[S]earch [T]ag' })
+vim.keymap.set('n', '<leader>sw', buildin.grep_string, { desc = '[S]earch current [W]ord' })
+vim.keymap.set('n', '<leader>sg', buildin.live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by [G]rep on Git Root' })
-vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
-vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
+vim.keymap.set('n', '<leader>sd', buildin.diagnostics, { desc = '[S]earch [D]iagnostics' })
+vim.keymap.set('n', '<leader>sr', buildin.resume, { desc = '[S]earch [R]esume' })
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
