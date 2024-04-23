@@ -247,7 +247,7 @@ endif
 if filereadable(expand("$HOME/vimfiles/autoload/plug.vim"))
 
   call plug#begin('~/.vim/plugged')
-  "Plug 'neoclide/coc.nvim', {'branch': 'release'}
+  Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'skywind3000/asyncrun.vim'
   Plug 'junegunn/fzf', {'do': {-> fzf#install()}}
   Plug 'junegunn/fzf.vim'
@@ -386,7 +386,7 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 
 " functions keys
 map <F1> :set number!<CR> :set relativenumber!<CR>
-nmap <F2> :call <SID>SynStack()<CR>
+"nmap <F2> :call <SID>SynStack()<CR>
 set pastetoggle=<F3>
 map <F4> :set list!<CR>
 map <F5> :set cursorline!<CR>
@@ -478,5 +478,38 @@ nnoremap gd <C-]>
 " Move lines
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
+
+" Rename
+function! RenameVariable()
+    " Get the word under the cursor
+    let oldVar = expand("<cword>")
+
+    " If there's no word under the cursor, prompt the user for the old
+    " variable name
+    if oldVar == ''
+        let oldVar = input("Enter old variable nme: ")
+    endif
+
+    " Prompt the user for the new variable name
+    let newVar = input("Enter new variable name: ")
+
+    " If the user didn't enter a new variable name, exit the function
+    if newVar == ''
+        echo "No new variable name entered. Exiting..."
+        return
+    endif
+
+    " Load all files in the project
+    "args **/*.h **/*.cpp
+    args **/*
+
+    " Perform the search and replace
+    execute 'argdo %s/\V\<' . oldVar . '\>/' . newVar . '/gc'
+
+    " Write all changes to the files
+    wall
+endfunction
+
+nnoremap <F2> :call RenameVariable()<CR>
 
 source $HOME/vimfiles/colors/vertsplit.vim
