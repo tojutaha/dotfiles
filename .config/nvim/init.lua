@@ -44,7 +44,8 @@ require('lazy').setup({
   'dhananjaylatkar/cscope_maps.nvim',
   'hari-rangarajan/CCTree',
   'mg979/vim-visual-multi',
-
+  'timtro/glslView-nvim',
+  'voldikss/vim-floaterm',
   'folke/zen-mode.nvim',
 
   -- Detect tabstop and shiftwidth automatically
@@ -217,6 +218,20 @@ require('lazy').setup({
     },
   },
 
+  { -- Scratch buffer
+    "https://git.sr.ht/~swaits/scratch.nvim",
+    lazy = true,
+    keys = {
+      { "<leader>bs", "<cmd>Scratch<cr>", desc = "Scratch Buffer", mode = "n" },
+      { "<leader>bS", "<cmd>ScratchSplit<cr>", desc = "Scratch Buffer (split)", mode = "n" },
+    },
+    cmd = {
+      "Scratch",
+      "ScratchSplit",
+    },
+    opts = {},
+  },
+
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
@@ -230,6 +245,9 @@ require('lazy').setup({
   {
     "rebelot/kanagawa.nvim",
     "savq/melange-nvim",
+    "catppuccin/nvim",
+    "folke/tokyonight.nvim",
+    "xiyaowong/transparent.nvim",
     --priority = 100,
     --config = function()
       --vim.cmd([[colorscheme visual_studio_code]])
@@ -250,6 +268,16 @@ require('lazy').setup({
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   -- { import = 'custom.plugins' },
 }, {})
+
+-- glslViewer
+require('glslView').setup {
+  viewer_path = 'glslViewer',
+  args = { '-l' },
+}
+
+-- Floaterm
+vim.api.nvim_set_keymap('n', '<leader>ft', ':FloatermToggle<CR>', {noremap = true, silent = true})
+
 
 -- Scope annotation
 local api = vim.api
@@ -416,6 +444,9 @@ vim.o.tabstop = 4
 vim.o.expandtab = true
 vim.o.smartindent = true
 
+-- Disable word wrap
+vim.o.wrap = false
+
 -- Disable jumping into warnings
 vim.cmd [[set errorformat^=%-G%f:%l:\ warning:\ %m]]
 
@@ -508,11 +539,13 @@ if vim.fn.has('win32') == 1 then
 else
     -- Linux version here:
     vim.api.nvim_set_keymap('n', '<A-b>', ':AsyncRun ./build.sh<CR>', {noremap = true, silent = true})
+    vim.api.nvim_set_keymap('n', '<A-r>', ':AsyncRun ./run.sh<CR>',   {noremap = true, silent = true})
     vim.api.nvim_set_keymap('n', '<A-t>', ':AsyncRun ctags -R .<CR>', {noremap = true, silent = true})
 end
 
 -- Neovide
 if vim.g.neovide ~= nil then
+vim.opt.guifont = "DejaVu Sans Mono:h12"
 function _G.toggle_fullscreen()
     local is_fullscreen = vim.api.nvim_eval('g:neovide_fullscreen')
     if is_fullscreen == true then
@@ -540,7 +573,9 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
-vim.cmd [[colorscheme kanagawa-dragon]]
+-- vim.cmd [[colorscheme kanagawa-dragon]]
+vim.cmd [[colorscheme catppuccin]]
+-- vim.cmd [[colorscheme melange]]
 
 -- Font
 -- vim.o.guifont = "Consolas:h12"
@@ -764,6 +799,7 @@ local on_attach = function(_, bufnr)
 
   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+  vim.api.nvim_set_keymap('n', '<M-f>', '<cmd>ClangdSwitchSourceHeader<CR>', {noremap = true, silent = true})
 
   nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')

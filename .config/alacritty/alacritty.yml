@@ -42,7 +42,7 @@ window:
   #     - buttonless: Title bar, transparent background and title bar buttons
   #     - transparent: Title bar, transparent background, but no title bar buttons
   decorations: Full
-  opacity: 0.85
+  opacity: 0.9
   # Startup Mode (changes require restart)
   #
   # Values for `startup_mode`:
@@ -97,13 +97,13 @@ draw_bold_text_with_bright_colors: true
 #colors:
 import:
    #- ~/.config/alacritty/themes/themes/ayu_dark.yaml
-   #- ~/.config/alacritty/themes/themes/gruvbox_dark.yaml
-   - ~/.config/alacritty/themes/themes/rose-pine.yaml
+   - ~/.config/alacritty/themes/themes/gruvbox_dark.yaml
+   #- ~/.config/alacritty/themes/themes/rose-pine.yaml
 
 cursor:
     shape: Block
     blinking: true
-    blink-interval: 750
+      #blink-interval: 750
 
 font:
   size: 14

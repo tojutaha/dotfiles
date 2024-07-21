@@ -13,7 +13,8 @@ set $mod Mod1
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:monospace 8
+# font pango:monospace 8
+font pango:MesloLGL Nerd Font 8
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
@@ -53,7 +54,7 @@ floating_modifier $mod
 
 # start a terminal
 #bindsym $mod+Return exec i3-sensible-terminal
-bindsym $mod+Return exec kitty
+bindsym $mod+Return exec alacritty
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -160,19 +161,73 @@ bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -B 'Yes, exit i3' 'i3-msg exit'"
+# bindsym $mod+Shift+x exec --no-startup-id [ "$(echo "Yes:No" | rofi -dmenu -p "Restart now?" -sep ":" -select "Yes" -l 2 -width 40 -m 1)" == "Yes" ] && i3-msg exit
 
 # Window colors
+set $rosewater #f4dbd6
+set $flamingo #f0c6c6
+set $pink #f5bde6
+set $mauve #c6a0f6
+set $red #ed8796
+set $maroon #ee99a0
+set $peach #f5a97f
+set $yellow #eed49f
+set $green #a6da95
+set $teal #8bd5ca
+set $sky #91d7e3
+set $sapphire #7dc4e4
+set $blue #8aadf4
+set $lavender #b7bdf8
+set $text #cad3f5
+set $subtext1 #b8c0e0
+set $subtext0 #a5adcb
+set $overlay2 #939ab7
+set $overlay1 #8087a2
+set $overlay0 #6e738d
+set $surface2 #5b6078
+set $surface1 #494d64
+set $surface0 #363a4f
+set $base #24273a
+set $mantle #1e2030
+set $crust #181926
 #set $bg-color #2f343f
 #set $inactive-bg-color #2f343f
 #set $text-color #f3f4f5
 #set $inactive-text-color #676E7D
 #set $urgent-bg-color #E53935
 
+# <colorclass> <border> <background> <text> <indicator> <child_border>
 #hide_edge_borders none
-#client.focused #000000 #285577 #ffffff #44eda7 #44eda7
-#client.focused #000000 #44eda7 #ffffff #44eda7 #44eda7
+# client.focused #000000 #285577 #ffffff #44eda7 #44eda7
+# client.focused #000000 #44eda7 #ffffff #44eda7 #44eda7
+# client.focused #00007f #44eda7 #ffffff #44eda7 #44eda7
 # Orange borders
-client.focused #000000 #FFCB14 #ffffff #FFCB14 #FFCB14
+# client.focused #000000 #FFCB14 #ffffff #FFCB14 #FFCB14
+# Blue borders
+# client.focused #98c379 #98c379 #ffffff #ffffff #98c379
+# client.focused #b4befe #b4befe #ffffff #ffffff #b4befe
+# target                 title     bg    text   indicator  border
+client.focused           $lavender $base $text  $rosewater $lavender
+client.focused_inactive  $overlay0 $base $text  $rosewater $overlay0
+client.unfocused         $overlay0 $base $text  $rosewater $overlay0
+client.urgent            $peach    $base $peach $overlay0  $peach
+client.placeholder       $overlay0 $base $text  $overlay0  $overlay0
+client.background        $base
+
+# bar
+bar {
+  colors {
+    background         $base
+    statusline         $text
+    focused_statusline $text
+    focused_separator  $base
+    focused_workspace  $base $base $green
+    active_workspace   $base $base $blue
+    inactive_workspace $base $base $surface1
+    urgent_workspace   $base $base $surface1
+    binding_mode       $base $base $surface1
+  }
+}
 new_window pixel 1
 new_float pixel 1
 
@@ -211,6 +266,6 @@ bindsym $mod+r mode "resize"
 exec --no-startup-id /usr/bin/gnome-keyring-daemon --start --components=secrets
 #exec_always --no-startup-id ~/.config/polybar/launch.sh 
 exec --no-startup-id ~/.config/polybar/launch.sh 
-exec --no-startup-id sleep 2 && nitrogen --restore
+# exec --no-startup-id sleep 2 && nitrogen --restore
 exec --no-startup-id ~/monitor.sh
 exec --no-startup-id picom -b
