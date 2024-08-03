@@ -44,9 +44,9 @@ require('lazy').setup({
   'dhananjaylatkar/cscope_maps.nvim',
   'hari-rangarajan/CCTree',
   'mg979/vim-visual-multi',
-  'timtro/glslView-nvim',
   'voldikss/vim-floaterm',
   'folke/zen-mode.nvim',
+  'junegunn/vim-easy-align',
 
   -- Detect tabstop and shiftwidth automatically
   --'tpope/vim-sleuth',
@@ -241,6 +241,14 @@ require('lazy').setup({
     build = ':TSUpdate',
   },
 
+  -- DAP
+  {
+    "mfussenegger/nvim-dap",
+    "theHamsta/nvim-dap-virtual-text",
+    "rcarriga/nvim-dap-ui",
+    "nvim-neotest/nvim-nio"
+  },
+
   -- Themes
   {
     "rebelot/kanagawa.nvim",
@@ -248,6 +256,7 @@ require('lazy').setup({
     "catppuccin/nvim",
     "folke/tokyonight.nvim",
     "xiyaowong/transparent.nvim",
+    "ellisonleao/gruvbox.nvim",
     --priority = 100,
     --config = function()
       --vim.cmd([[colorscheme visual_studio_code]])
@@ -269,11 +278,120 @@ require('lazy').setup({
   -- { import = 'custom.plugins' },
 }, {})
 
--- glslViewer
-require('glslView').setup {
-  viewer_path = 'glslViewer',
-  args = { '-l' },
-}
+
+-- DAP
+local ok, dap = pcall(require, 'dap')
+if ok then
+  dap.adapters.gdb = {
+    id = 'gdb',
+    type = 'executable',
+    command = 'gdb',
+    args = { '--quiet', '--interpreter=dap' },
+  }
+
+  dap.configurations.c = {
+    {
+        name = 'Run executable (GDB)',
+        type = 'gdb',
+        request = 'launch',
+        -- This requires special handling of 'run_last', see
+        -- https://github.com/mfussenegger/nvim-dap/issues/1025#issuecomment-1695852355
+        program = function()
+            local path = vim.fn.input({
+                prompt = 'Path to executable: ',
+                default = vim.fn.getcwd() .. '/',
+                completion = 'file',
+            })
+
+            return (path and path ~= '') and path or dap.ABORT
+        end,
+    },
+    {
+        name = 'Run executable with arguments (GDB)',
+        type = 'gdb',
+        request = 'launch',
+        -- This requires special handling of 'run_last', see
+        -- https://github.com/mfussenegger/nvim-dap/issues/1025#issuecomment-1695852355
+        program = function()
+            local path = vim.fn.input({
+                prompt = 'Path to executable: ',
+                default = vim.fn.getcwd() .. '/',
+                completion = 'file',
+            })
+
+            return (path and path ~= '') and path or dap.ABORT
+        end,
+        args = function()
+            local args_str = vim.fn.input({
+                prompt = 'Arguments: ',
+            })
+            return vim.split(args_str, ' +')
+        end,
+    },
+    {
+        name = 'Attach to process (GDB)',
+        type = 'gdb',
+        request = 'attach',
+        processId = require('dap.utils').pick_process,
+    },
+  }
+  -- Copy pasta..
+  dap.configurations.cpp = {
+    {
+        name = 'Run executable (GDB)',
+        type = 'gdb',
+        request = 'launch',
+        -- This requires special handling of 'run_last', see
+        -- https://github.com/mfussenegger/nvim-dap/issues/1025#issuecomment-1695852355
+        program = function()
+            local path = vim.fn.input({
+                prompt = 'Path to executable: ',
+                default = vim.fn.getcwd() .. '/',
+                completion = 'file',
+            })
+
+            return (path and path ~= '') and path or dap.ABORT
+        end,
+    },
+    {
+        name = 'Run executable with arguments (GDB)',
+        type = 'gdb',
+        request = 'launch',
+        -- This requires special handling of 'run_last', see
+        -- https://github.com/mfussenegger/nvim-dap/issues/1025#issuecomment-1695852355
+        program = function()
+            local path = vim.fn.input({
+                prompt = 'Path to executable: ',
+                default = vim.fn.getcwd() .. '/',
+                completion = 'file',
+            })
+
+            return (path and path ~= '') and path or dap.ABORT
+        end,
+        args = function()
+            local args_str = vim.fn.input({
+                prompt = 'Arguments: ',
+            })
+            return vim.split(args_str, ' +')
+        end,
+    },
+    {
+        name = 'Attach to process (GDB)',
+        type = 'gdb',
+        request = 'attach',
+        processId = require('dap.utils').pick_process,
+    },
+  }
+end
+
+vim.api.nvim_set_keymap("n", "<leader>du", ":lua require('dapui').toggle()<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<leader>dd", ":DapNew<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<leader>dt", ":DapTerminate<CR>", { noremap = true })
+vim.api.nvim_set_keymap("n", "<leader>db", ":DapToggleBreakpoint<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<F8>", ":DapStepOver<CR>", { noremap = true, silent = true })
+vim.api.nvim_set_keymap("n", "<F10>", ":DapStepInto<CR>", { noremap = true, silent = true })
+
+require('dapui').setup()
 
 -- Floaterm
 vim.api.nvim_set_keymap('n', '<leader>ft', ':FloatermToggle<CR>', {noremap = true, silent = true})
@@ -444,6 +562,8 @@ vim.o.tabstop = 4
 vim.o.expandtab = true
 vim.o.smartindent = true
 
+vim.o.scrolloff = 4
+
 -- Enable cursorline
 vim.opt.cursorline = true
 
@@ -488,49 +608,6 @@ vim.api.nvim_set_keymap('n', '<leader>q', ':lua toggle_quickfix()<CR>', {noremap
 vim.api.nvim_set_keymap('n', '<A-n>', ':cn<CR>', {noremap = true, silent = true})
 vim.api.nvim_set_keymap('n', '<A-N>', ':cp<CR>', {noremap = true, silent = true})
 
--- Cycle through colorschemes
-vim.g.colors = vim.fn.getcompletion('', 'color')
-
-local function get_index(tbl, val)
-    for i, v in ipairs(tbl) do
-        if v == val then
-            return i
-        end
-    end
-    return nil
-end
-
-_G.NextColor = function()
-    local idx = get_index(vim.g.colors, vim.g.colors_name)
-    if idx == nil or idx + 1 > #vim.g.colors then
-        return vim.g.colors[1]
-    else
-        return vim.g.colors[idx + 1]
-    end
-end
-
-_G.PrevColor = function()
-    local idx = get_index(vim.g.colors, vim.g.colors_name)
-    if idx == nil or idx - 1 < 1 then
-        return vim.g.colors[#vim.g.colors]
-    else
-        return vim.g.colors[idx - 1]
-    end
-end
-
-vim.cmd([[
-function! NextColorWrapper()
-    return luaeval('_G.NextColor()')
-endfunction
-
-function! PrevColorWrapper()
-    return luaeval('_G.PrevColor()')
-endfunction
-]])
-
-vim.api.nvim_set_keymap('n', '<F9>', ':exe "colo " .. NextColorWrapper()<CR>:colorscheme<CR>', {noremap = true})
-vim.api.nvim_set_keymap('n', '<F10>', ':exe "colo " .. PrevColorWrapper()<CR>:colorscheme<CR>', {noremap = true})
-
 -- Move lines
 vim.api.nvim_set_keymap('v', 'J', ":m '>+1<CR>gv=gv", {noremap = true, silent = true})
 vim.api.nvim_set_keymap('v', 'K', ":m '<-2<CR>gv=gv", {noremap = true, silent = true})
@@ -548,7 +625,7 @@ end
 
 -- Neovide
 if vim.g.neovide ~= nil then
-vim.opt.guifont = "DejaVu Sans Mono:h12"
+-- vim.opt.guifont = "DejaVu Sans Mono:h12"
 function _G.toggle_fullscreen()
     local is_fullscreen = vim.api.nvim_eval('g:neovide_fullscreen')
     if is_fullscreen == true then
@@ -565,7 +642,7 @@ vim.api.nvim_command('let g:neovide_cursor_vfx_mode = "pixiedust"')
 end
 
 -- Keep signcolumn on by default
-vim.wo.signcolumn = 'no'
+vim.wo.signcolumn = 'yes'
 
 -- Decrease update time
 vim.o.updatetime = 250
@@ -576,8 +653,33 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
+require("gruvbox").setup({
+  undercurl = true,
+  underline = true,
+  bold = true,
+  italic = {
+    strings = true,
+    emphasis = true,
+    comments = true,
+    operators = false,
+    folds = true,
+  },
+  strikethrough = true,
+  invert_selection = false,
+  invert_signs = false,
+  invert_tabline = false,
+  invert_intend_guides = false,
+  inverse = true, -- invert background for search, diffs, statuslines and errors
+  contrast = "hard", -- can be "hard", "soft" or empty string
+  palette_overrides = {},
+  overrides = {},
+  dim_inactive = false,
+  transparent_mode = false,
+})
+vim.o.background = "dark"
+vim.cmd [[colorscheme gruvbox]]
 -- vim.cmd [[colorscheme kanagawa-dragon]]
-vim.cmd [[colorscheme catppuccin]]
+-- vim.cmd [[colorscheme catppuccin]]
 -- vim.cmd [[colorscheme melange]]
 
 -- Font
@@ -629,6 +731,11 @@ require('telescope').setup {
         ['<C-u>'] = false,
         ['<C-d>'] = false,
       },
+    },
+  },
+  pickers = {
+    colorscheme = {
+      enable_preview = true,
     },
   },
 }
