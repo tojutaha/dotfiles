@@ -28,7 +28,6 @@ vim.opt.rtp:prepend(lazypath)
 --  You can also configure plugins after the setup call,
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
-  -- NOTE: First, some plugins that don't require any configuration
 
   -- Git related plugins
   'tpope/vim-fugitive',
@@ -47,6 +46,12 @@ require('lazy').setup({
   'voldikss/vim-floaterm',
   'folke/zen-mode.nvim',
   'junegunn/vim-easy-align',
+  'preservim/nerdtree',
+  'ryanoasis/vim-devicons',
+  -- Bionic reading
+  -- 'FluxxField/bionic-reading.nvim',
+  -- 'JellyApple102/easyread.nvim',
+  -- 'HampusHauffman/bionic.nvim',
 
   -- Detect tabstop and shiftwidth automatically
   --'tpope/vim-sleuth',
@@ -218,6 +223,10 @@ require('lazy').setup({
     },
   },
 
+  {
+    "fdschmidt93/telescope-egrepify.nvim",
+  },
+
   { -- Scratch buffer
     "https://git.sr.ht/~swaits/scratch.nvim",
     lazy = true,
@@ -257,10 +266,16 @@ require('lazy').setup({
     "folke/tokyonight.nvim",
     "xiyaowong/transparent.nvim",
     "ellisonleao/gruvbox.nvim",
+    "wurli/cobalt.nvim",
     --priority = 100,
     --config = function()
       --vim.cmd([[colorscheme visual_studio_code]])
     --end
+  },
+
+  -- Godot
+  {
+    'habamax/vim-godot'
   }
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -278,6 +293,29 @@ require('lazy').setup({
   -- { import = 'custom.plugins' },
 }, {})
 
+vim.api.nvim_set_keymap('t', '<Esc>', '<C-\\><C-n>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<leader>t', ':NERDTreeToggle<CR>', {noremap = true, silent = true})
+
+-- replace word but keep the yank
+local function replace_word_with_yank()
+  -- Delete the word under the cursor without affecting the default register
+  vim.cmd('normal! "_diw')
+  -- Paste the yanked text
+  vim.cmd('normal! viw"0p')
+end
+
+-- Godot
+-- local gdproject = io.open(vim.fn.getcwd()..'/project.godot', 'r')
+-- if gdproject then
+--     io.close(gdproject)
+--     vim.fn.serverstart './godothost'
+-- end
+
+vim.api.nvim_set_keymap('n', 'viwp', '', {
+  noremap = true,
+  silent = true,
+  callback = replace_word_with_yank
+})
 
 -- DAP
 local ok, dap = pcall(require, 'dap')
@@ -383,6 +421,22 @@ if ok then
     },
   }
 end
+
+dap.adapters.godot = {
+  type = 'server',
+  host = '127.0.0.1',
+  port = 6006,
+}
+
+dap.configurations.gdscript = {
+  {
+    name = 'Launch Scene',
+    type = 'godot',
+    request = 'launch',
+    project = '${workspaceFolder}',
+    launch_scene = true,
+  },
+}
 
 vim.api.nvim_set_keymap("n", "<leader>du", ":lua require('dapui').toggle()<CR>", { noremap = true })
 vim.api.nvim_set_keymap("n", "<leader>dd", ":DapNew<CR>", { noremap = true })
@@ -532,6 +586,9 @@ require('lualine').setup {
 -- Set highlight on search
 vim.o.hlsearch = false
 
+-- vim.opt.guicursor = "n-v-c-i:block,i:block"
+vim.opt.guicursor = "n-v-c-i:block-nCursor,i:ver25-nCursor,o:hor50-nCursor"
+
 -- Preview substitutions live, as you type
 --vim.opt.inccommand = "true"
 
@@ -552,17 +609,26 @@ vim.o.breakindent = true
 
 -- Save undo history
 vim.o.undofile = true
+-- Remember last cursor position
+vim.api.nvim_create_autocmd("BufReadPost", {
+  pattern = "*",
+  callback = function()
+    local last_pos = vim.fn.line("'\"")
+    if last_pos > 0 and last_pos <= vim.fn.line("$") then
+      vim.cmd("normal! g`\"")
+    end
+  end,
+})
 
 -- Case-insensitive searching UNLESS \C or capital in search
-vim.o.ignorecase = true
-vim.o.smartcase = true
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
 
-vim.o.shiftwidth = 4
-vim.o.tabstop = 4
-vim.o.expandtab = true
-vim.o.smartindent = true
-
-vim.o.scrolloff = 4
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.scrolloff = 4
 
 -- Enable cursorline
 vim.opt.cursorline = true
@@ -625,7 +691,7 @@ end
 
 -- Neovide
 if vim.g.neovide ~= nil then
--- vim.opt.guifont = "DejaVu Sans Mono:h12"
+-- vim.opt.guifont = "Jetbrains Mono:h12"
 function _G.toggle_fullscreen()
     local is_fullscreen = vim.api.nvim_eval('g:neovide_fullscreen')
     if is_fullscreen == true then
@@ -676,14 +742,11 @@ require("gruvbox").setup({
   dim_inactive = false,
   transparent_mode = false,
 })
-vim.o.background = "dark"
-vim.cmd [[colorscheme gruvbox]]
--- vim.cmd [[colorscheme kanagawa-dragon]]
--- vim.cmd [[colorscheme catppuccin]]
--- vim.cmd [[colorscheme melange]]
 
--- Font
--- vim.o.guifont = "Consolas:h12"
+vim.o.background = "dark"
+-- vim.cmd [[colorscheme gruvbox]]
+vim.cmd [[colorscheme dracula]]
+-- vim.cmd [[colorscheme PaperColor]]
 
 -- [[ Basic Keymaps ]]
 
@@ -739,6 +802,8 @@ require('telescope').setup {
     },
   },
 }
+
+require 'telescope'.load_extension "egrepify"
 
 -- Configure cscope_maps
 require('cscope_maps').setup()
@@ -820,10 +885,10 @@ vim.keymap.set('n', '<leader>sr', buildin.resume, { desc = '[S]earch [R]esume' }
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'gdscript', 'godot_resource', 'gdshader', 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-    auto_install = false,
+    auto_install = true,
     -- Install languages synchronously (only applied to `ensure_installed`)
     sync_install = false,
     -- List of parsers to ignore installing
@@ -938,14 +1003,6 @@ end
 
 -- document existing key chains
 require('which-key').add {
-  -- ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-  -- ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-  -- ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
-  -- ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-  -- ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-  -- ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-  -- ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-  -- ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
     { "<leader>c", desc = "[C]ode" },
     { "<leader>d", desc = "[D]ocument" },
     { "<leader>r", desc = "[R]ename" },
@@ -992,6 +1049,7 @@ require('neodev').setup()
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+require('lspconfig').gdscript.setup(capabilities)
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
@@ -1030,10 +1088,10 @@ lspconfig.clangd.setup{
         virtual_text = {
             spacing = 4,
             source = "if_many",
-            prefix = "●",
+            -- prefix = "●",
             -- this will set set the prefix to a function that returns the diagnostics icon based on the severity
             -- this only works on a recent 0.10.0 build. Will be set to "●" when not supported
-            -- prefix = "icons",
+            prefix = "icons",
         },
     },
     opts = {
