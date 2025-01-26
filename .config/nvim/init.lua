@@ -29,32 +29,144 @@ vim.opt.rtp:prepend(lazypath)
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
 
-  -- Git related plugins
-  'tpope/vim-fugitive',
-  'tpope/vim-rhubarb',
-
-  -- 
   'duane9/nvim-rg',
   'skywind3000/asyncrun.vim',
   'junegunn/fzf.vim',
   'zackhsi/fzf-tags',
-  'ervandew/supertab',
-  'vim-scripts/TagHighlight',
-  'dhananjaylatkar/cscope_maps.nvim',
-  'hari-rangarajan/CCTree',
+  -- 'ervandew/supertab',
   'mg979/vim-visual-multi',
-  'voldikss/vim-floaterm',
-  'folke/zen-mode.nvim',
+  -- 'voldikss/vim-floaterm',
   'junegunn/vim-easy-align',
-  'preservim/nerdtree',
+  'folke/zen-mode.nvim',
   'ryanoasis/vim-devicons',
-  -- Bionic reading
-  -- 'FluxxField/bionic-reading.nvim',
-  -- 'JellyApple102/easyread.nvim',
-  -- 'HampusHauffman/bionic.nvim',
 
-  -- Detect tabstop and shiftwidth automatically
-  --'tpope/vim-sleuth',
+  {
+    'nvimdev/lspsaga.nvim',
+    config = function()
+      require('lspsaga').setup({})
+    end,
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    }
+  },
+
+  {
+    'Chaitanyabsprip/fastaction.nvim',
+      ---@type FastActionConfig
+      opts = {},
+  },
+
+  {
+    "supermaven-inc/supermaven-nvim",
+    config = function()
+      require("supermaven-nvim").setup({
+        -- keymaps = {
+        --   accept_suggestion = "<Tab>",
+        --   clear_suggestion = "<C-]>",
+        --   accept_word = "<C-j>",
+        -- },
+        -- ignore_filetypes = { cpp = true }, -- or { "cpp", }
+        -- color = {
+        --   suggestion_color = "#ffffff",
+        --   cterm = 244,
+        -- },
+        log_level = "info", -- set to "off" to disable logging completely
+        disable_inline_completion = false, -- disables inline completion for use with cmp
+        disable_keymaps = true, -- disables built in keymaps for more manual control
+        condition = function()
+          return false
+        end -- condition to check for stopping supermaven, `true` means to stop supermaven when the condition is true
+      })
+    end,
+  },
+
+  {
+    'p00f/clangd_extensions.nvim',
+    config = function()
+      require('clangd_extensions').setup({
+        inlay_hints = {
+          inline = vim.fn.has("nvim-0.10") == 1,
+          -- Options other than `highlight' and `priority' only work
+          -- if `inline' is disabled
+          -- Only show inlay hints for the current line
+          only_current_line = false,
+          -- Event which triggers a refresh of the inlay hints.
+          -- You can make this { "CursorMoved" } or { "CursorMoved,CursorMovedI" } but
+          -- note that this may cause higher CPU usage.
+          -- This option is only respected when only_current_line is true.
+          only_current_line_autocmd = { "CursorHold" },
+          -- whether to show parameter hints with the inlay hints or not
+          show_parameter_hints = true,
+          -- prefix for parameter hints
+          parameter_hints_prefix = "<- ",
+          -- prefix for all the other hints (type, chaining)
+          other_hints_prefix = "=> ",
+          -- whether to align to the length of the longest line in the file
+          max_len_align = false,
+          -- padding from the left if max_len_align is true
+          max_len_align_padding = 1,
+          -- whether to align to the extreme right or not
+          right_align = false,
+          -- padding from the right if right_align is true
+          right_align_padding = 7,
+          -- The color of the hints
+          highlight = "Comment",
+          -- The highlight group priority for extmark
+          priority = 100,
+        },
+        ast = {
+          -- These are unicode, should be available in any font
+          role_icons = {
+            type = "🄣",
+            declaration = "🄓",
+            expression = "🄔",
+            statement = ";",
+            specifier = "🄢",
+            ["template argument"] = "🆃",
+          },
+          kind_icons = {
+            Compound = "🄲",
+            Recovery = "🅁",
+            TranslationUnit = "🅄",
+            PackExpansion = "🄿",
+            TemplateTypeParm = "🅃",
+            TemplateTemplateParm = "🅃",
+            TemplateParamObject = "🅃",
+          },
+          --[[ These require codicons (https://github.com/microsoft/vscode-codicons)
+          role_icons = {
+            type = "",
+            declaration = "",
+            expression = "",
+            specifier = "",
+            statement = "",
+            ["template argument"] = "",
+          },
+
+          kind_icons = {
+            Compound = "",
+            Recovery = "",
+            TranslationUnit = "",
+            PackExpansion = "",
+            TemplateTypeParm = "",
+            TemplateTemplateParm = "",
+            TemplateParamObject = "",
+          }, ]]
+
+          highlights = {
+            detail = "Comment",
+          },
+        },
+        memory_usage = {
+          border = "none",
+        },
+        symbol_info = {
+          border = "none",
+        },
+      })
+    end,
+  },
 
   -- NOTE: This is where your plugins related to LSP can be installed.
   --  The configuration is done below. Search for lspconfig to find it below.
@@ -65,13 +177,6 @@ require('lazy').setup({
       -- Automatically install LSPs to stdpath for neovim
       { 'williamboman/mason.nvim', config = true },
       'williamboman/mason-lspconfig.nvim',
-
-      -- Useful status updates for LSP
-      -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
-
-      -- Additional lua configuration, makes nvim stuff amazing!
-      'folke/neodev.nvim',
     },
   },
 
@@ -95,86 +200,9 @@ require('lazy').setup({
       'hrsh7th/cmp-path',
 
       -- Adds a number of user-friendly snippets
-      'rafamadriz/friendly-snippets',
+      -- 'rafamadriz/friendly-snippets',
     },
   },
-
-  -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
-  -- {
-  --   -- Adds git related signs to the gutter, as well as utilities for managing changes
-  --   'lewis6991/gitsigns.nvim',
-  --   opts = {
-  --     -- See `:help gitsigns.txt`
-  --     signs = {
-  --       add = { text = '+' },
-  --       change = { text = '~' },
-  --       delete = { text = '_' },
-  --       topdelete = { text = '‾' },
-  --       changedelete = { text = '~' },
-  --     },
-  --     on_attach = function(bufnr)
-  --       local gs = package.loaded.gitsigns
-  --
-  --       local function map(mode, l, r, opts)
-  --         opts = opts or {}
-  --         opts.buffer = bufnr
-  --         vim.keymap.set(mode, l, r, opts)
-  --       end
-  --
-  --       -- Navigation
-  --       map({ 'n', 'v' }, ']c', function()
-  --         if vim.wo.diff then
-  --           return ']c'
-  --         end
-  --         vim.schedule(function()
-  --           gs.next_hunk()
-  --         end)
-  --         return '<Ignore>'
-  --       end, { expr = true, desc = 'Jump to next hunk' })
-  --
-  --       map({ 'n', 'v' }, '[c', function()
-  --         if vim.wo.diff then
-  --           return '[c'
-  --         end
-  --         vim.schedule(function()
-  --           gs.prev_hunk()
-  --         end)
-  --         return '<Ignore>'
-  --       end, { expr = true, desc = 'Jump to previous hunk' })
-  --
-  --       -- Actions
-  --       -- visual mode
-  --       map('v', '<leader>hs', function()
-  --         gs.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
-  --       end, { desc = 'stage git hunk' })
-  --       map('v', '<leader>hr', function()
-  --         gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
-  --       end, { desc = 'reset git hunk' })
-  --       -- normal mode
-  --       map('n', '<leader>hs', gs.stage_hunk, { desc = 'git stage hunk' })
-  --       map('n', '<leader>hr', gs.reset_hunk, { desc = 'git reset hunk' })
-  --       map('n', '<leader>hS', gs.stage_buffer, { desc = 'git Stage buffer' })
-  --       map('n', '<leader>hu', gs.undo_stage_hunk, { desc = 'undo stage hunk' })
-  --       map('n', '<leader>hR', gs.reset_buffer, { desc = 'git Reset buffer' })
-  --       map('n', '<leader>hp', gs.preview_hunk, { desc = 'preview git hunk' })
-  --       map('n', '<leader>hb', function()
-  --         gs.blame_line { full = false }
-  --       end, { desc = 'git blame line' })
-  --       map('n', '<leader>hd', gs.diffthis, { desc = 'git diff against index' })
-  --       map('n', '<leader>hD', function()
-  --         gs.diffthis '~'
-  --       end, { desc = 'git diff against last commit' })
-  --
-  --       -- Toggles
-  --       map('n', '<leader>tb', gs.toggle_current_line_blame, { desc = 'toggle git blame line' })
-  --       map('n', '<leader>td', gs.toggle_deleted, { desc = 'toggle git show deleted' })
-  --
-  --       -- Text object
-  --       map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { desc = 'select git hunk' })
-  --     end,
-  --   },
-  -- },
 
   {
     -- Set lualine as statusline
@@ -189,15 +217,6 @@ require('lazy').setup({
       },
     },
   },
-
-  -- {
-  --   -- Add indentation guides even on blank lines
-  --   'lukas-reineke/indent-blankline.nvim',
-  --   -- Enable `lukas-reineke/indent-blankline.nvim`
-  --   -- See `:help ibl`
-  --   main = 'ibl',
-  --   opts = {},
-  -- },
 
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
@@ -220,25 +239,21 @@ require('lazy').setup({
           return vim.fn.executable 'make' == 1
         end,
       },
+
+      config = function()
+        require('telescope').setup {
+          extensions = {
+            fzf = {}
+          }
+        }
+
+        require('telescope').load_extension('fzf')
+      end
     },
   },
 
   {
     "fdschmidt93/telescope-egrepify.nvim",
-  },
-
-  { -- Scratch buffer
-    "https://git.sr.ht/~swaits/scratch.nvim",
-    lazy = true,
-    keys = {
-      { "<leader>bs", "<cmd>Scratch<cr>", desc = "Scratch Buffer", mode = "n" },
-      { "<leader>bS", "<cmd>ScratchSplit<cr>", desc = "Scratch Buffer (split)", mode = "n" },
-    },
-    cmd = {
-      "Scratch",
-      "ScratchSplit",
-    },
-    opts = {},
   },
 
   {
@@ -250,48 +265,44 @@ require('lazy').setup({
     build = ':TSUpdate',
   },
 
-  -- DAP
-  {
-    "mfussenegger/nvim-dap",
-    "theHamsta/nvim-dap-virtual-text",
-    "rcarriga/nvim-dap-ui",
-    "nvim-neotest/nvim-nio"
-  },
-
   -- Themes
   {
-    "rebelot/kanagawa.nvim",
-    "savq/melange-nvim",
-    "catppuccin/nvim",
-    "folke/tokyonight.nvim",
+    -- "askfiy/visual_studio_code",
+    -- "rebelot/kanagawa.nvim",
+    -- "folke/tokyonight.nvim",
+    -- "savq/melange-nvim",
+    -- "catppuccin/nvim",
+    -- "rose-pine/neovim",
     "xiyaowong/transparent.nvim",
     "ellisonleao/gruvbox.nvim",
-    "wurli/cobalt.nvim",
-    --priority = 100,
-    --config = function()
-      --vim.cmd([[colorscheme visual_studio_code]])
-    --end
+    "comfysage/evergarden",
   },
 
-  -- Godot
-  {
-    'habamax/vim-godot'
-  }
-
-  -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
-  --       These are some example plugins that I've included in the kickstart repository.
-  --       Uncomment any of the lines below to enable them.
-  -- require 'kickstart.plugins.autoformat',
-  -- require 'kickstart.plugins.debug',
-
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
-  --    up-to-date with whatever is in the kickstart repo.
-  --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  --
-  --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
-  -- { import = 'custom.plugins' },
 }, {})
+
+-- Terminal
+
+vim.api.nvim_create_autocmd('TermOpen', {
+  group = vim.api.nvim_create_augroup('TermOpen', { clear = true }),
+  callback = function()
+    vim.opt.number = false
+    vim.opt.relativenumber = false
+  end,
+})
+
+local job_id = 0
+vim.keymap.set('n', '<space>tt', function()
+  vim.cmd.vnew()
+  vim.cmd.term()
+  vim.cmd.wincmd('J')
+  vim.api.nvim_win_set_height(0, 10)
+  -- vim.api.nvim_open_win()
+  job_id = vim.bo.channel
+end)
+
+vim.keymap.set('n', '<space>tc', function()
+  vim.fn.chansend(job_id, { "ls -la\r\n" })
+end)
 
 vim.api.nvim_set_keymap('t', '<Esc>', '<C-\\><C-n>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>t', ':NERDTreeToggle<CR>', {noremap = true, silent = true})
@@ -304,148 +315,11 @@ local function replace_word_with_yank()
   vim.cmd('normal! viw"0p')
 end
 
--- Godot
--- local gdproject = io.open(vim.fn.getcwd()..'/project.godot', 'r')
--- if gdproject then
---     io.close(gdproject)
---     vim.fn.serverstart './godothost'
--- end
-
 vim.api.nvim_set_keymap('n', 'viwp', '', {
   noremap = true,
   silent = true,
   callback = replace_word_with_yank
 })
-
--- DAP
-local ok, dap = pcall(require, 'dap')
-if ok then
-  dap.adapters.gdb = {
-    id = 'gdb',
-    type = 'executable',
-    command = 'gdb',
-    args = { '--quiet', '--interpreter=dap' },
-  }
-
-  dap.configurations.c = {
-    {
-        name = 'Run executable (GDB)',
-        type = 'gdb',
-        request = 'launch',
-        -- This requires special handling of 'run_last', see
-        -- https://github.com/mfussenegger/nvim-dap/issues/1025#issuecomment-1695852355
-        program = function()
-            local path = vim.fn.input({
-                prompt = 'Path to executable: ',
-                default = vim.fn.getcwd() .. '/',
-                completion = 'file',
-            })
-
-            return (path and path ~= '') and path or dap.ABORT
-        end,
-    },
-    {
-        name = 'Run executable with arguments (GDB)',
-        type = 'gdb',
-        request = 'launch',
-        -- This requires special handling of 'run_last', see
-        -- https://github.com/mfussenegger/nvim-dap/issues/1025#issuecomment-1695852355
-        program = function()
-            local path = vim.fn.input({
-                prompt = 'Path to executable: ',
-                default = vim.fn.getcwd() .. '/',
-                completion = 'file',
-            })
-
-            return (path and path ~= '') and path or dap.ABORT
-        end,
-        args = function()
-            local args_str = vim.fn.input({
-                prompt = 'Arguments: ',
-            })
-            return vim.split(args_str, ' +')
-        end,
-    },
-    {
-        name = 'Attach to process (GDB)',
-        type = 'gdb',
-        request = 'attach',
-        processId = require('dap.utils').pick_process,
-    },
-  }
-  -- Copy pasta..
-  dap.configurations.cpp = {
-    {
-        name = 'Run executable (GDB)',
-        type = 'gdb',
-        request = 'launch',
-        -- This requires special handling of 'run_last', see
-        -- https://github.com/mfussenegger/nvim-dap/issues/1025#issuecomment-1695852355
-        program = function()
-            local path = vim.fn.input({
-                prompt = 'Path to executable: ',
-                default = vim.fn.getcwd() .. '/',
-                completion = 'file',
-            })
-
-            return (path and path ~= '') and path or dap.ABORT
-        end,
-    },
-    {
-        name = 'Run executable with arguments (GDB)',
-        type = 'gdb',
-        request = 'launch',
-        -- This requires special handling of 'run_last', see
-        -- https://github.com/mfussenegger/nvim-dap/issues/1025#issuecomment-1695852355
-        program = function()
-            local path = vim.fn.input({
-                prompt = 'Path to executable: ',
-                default = vim.fn.getcwd() .. '/',
-                completion = 'file',
-            })
-
-            return (path and path ~= '') and path or dap.ABORT
-        end,
-        args = function()
-            local args_str = vim.fn.input({
-                prompt = 'Arguments: ',
-            })
-            return vim.split(args_str, ' +')
-        end,
-    },
-    {
-        name = 'Attach to process (GDB)',
-        type = 'gdb',
-        request = 'attach',
-        processId = require('dap.utils').pick_process,
-    },
-  }
-end
-
-dap.adapters.godot = {
-  type = 'server',
-  host = '127.0.0.1',
-  port = 6006,
-}
-
-dap.configurations.gdscript = {
-  {
-    name = 'Launch Scene',
-    type = 'godot',
-    request = 'launch',
-    project = '${workspaceFolder}',
-    launch_scene = true,
-  },
-}
-
-vim.api.nvim_set_keymap("n", "<leader>du", ":lua require('dapui').toggle()<CR>", { noremap = true })
-vim.api.nvim_set_keymap("n", "<leader>dd", ":DapNew<CR>", { noremap = true })
-vim.api.nvim_set_keymap("n", "<leader>dt", ":DapTerminate<CR>", { noremap = true })
-vim.api.nvim_set_keymap("n", "<leader>db", ":DapToggleBreakpoint<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<F8>", ":DapStepOver<CR>", { noremap = true, silent = true })
-vim.api.nvim_set_keymap("n", "<F10>", ":DapStepInto<CR>", { noremap = true, silent = true })
-
-require('dapui').setup()
 
 -- Floaterm
 vim.api.nvim_set_keymap('n', '<leader>ft', ':FloatermToggle<CR>', {noremap = true, silent = true})
@@ -509,15 +383,6 @@ function toggle_annotate_scope()
     api.nvim_buf_clear_namespace(buf, ns_id, 0, -1)
 end
 
--- vim.api.nvim_exec([[
---   highlight AnnotateColor guifg=#ff0000
---   augroup AnnotateScope
---     autocmd!
---     autocmd CursorMoved,CursorMovedI,InsertLeave * lua clear_virtual_text()
---     autocmd CursorHold,CursorHoldI,InsertEnter * lua annotate_scope()
---   augroup END
--- ]], false)
-
 vim.api.nvim_set_keymap('n', '<F5>', ':lua toggle_annotate_scope()<CR>', {noremap = true})
 
 vim.api.nvim_exec([[
@@ -527,7 +392,6 @@ vim.api.nvim_exec([[
     autocmd CursorHold * lua annotate_scope()
   augroup END
 ]], false)
---
 
 require('lsp_signature').setup({
     bind = true,
@@ -593,8 +457,8 @@ vim.opt.guicursor = "n-v-c-i:block-nCursor,i:ver25-nCursor,o:hor50-nCursor"
 --vim.opt.inccommand = "true"
 
 -- Make line numbers default
-vim.wo.number = true
-vim.wo.relativenumber = true
+vim.wo.number = false
+vim.wo.relativenumber = false
 
 -- Enable mouse mode
 vim.o.mouse = 'a'
@@ -629,9 +493,6 @@ vim.opt.tabstop = 4
 vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.scrolloff = 4
-
--- Enable cursorline
-vim.opt.cursorline = true
 
 -- Disable word wrap
 vim.o.wrap = false
@@ -708,7 +569,7 @@ vim.api.nvim_command('let g:neovide_cursor_vfx_mode = "pixiedust"')
 end
 
 -- Keep signcolumn on by default
-vim.wo.signcolumn = 'yes'
+vim.wo.signcolumn = 'no'
 
 -- Decrease update time
 vim.o.updatetime = 250
@@ -719,34 +580,25 @@ vim.o.completeopt = 'menuone,noselect'
 
 -- NOTE: You should make sure your terminal supports this
 vim.o.termguicolors = true
-require("gruvbox").setup({
-  undercurl = true,
-  underline = true,
-  bold = true,
-  italic = {
-    strings = true,
-    emphasis = true,
-    comments = true,
-    operators = false,
-    folds = true,
-  },
-  strikethrough = true,
-  invert_selection = false,
-  invert_signs = false,
-  invert_tabline = false,
-  invert_intend_guides = false,
-  inverse = true, -- invert background for search, diffs, statuslines and errors
-  contrast = "hard", -- can be "hard", "soft" or empty string
-  palette_overrides = {},
-  overrides = {},
-  dim_inactive = false,
-  transparent_mode = false,
-})
 
-vim.o.background = "dark"
--- vim.cmd [[colorscheme gruvbox]]
-vim.cmd [[colorscheme dracula]]
--- vim.cmd [[colorscheme PaperColor]]
+require("evergarden").setup({
+  transparent_backgground = false,
+  contrast_dark = 'hard',
+  override_terminal = true,
+  style = {
+    tabline = { reverse = true, color = 'green' },
+    search = { reverse = false, inc_reverse = true },
+    types = { italic = false },
+    keyword = { italic = false },
+    comment = { italic = false },
+  },
+  overrides = {},
+})
+vim.cmd [[colorscheme evergarden]]
+
+-- Font
+-- vim.o.guifont = "Consolas:h14"
+vim.o.guifont = "JetBrains Mono NL:h12"
 
 -- [[ Basic Keymaps ]]
 
@@ -804,9 +656,6 @@ require('telescope').setup {
 }
 
 require 'telescope'.load_extension "egrepify"
-
--- Configure cscope_maps
-require('cscope_maps').setup()
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
@@ -885,10 +734,10 @@ vim.keymap.set('n', '<leader>sr', buildin.resume, { desc = '[S]earch [R]esume' }
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'gdscript', 'godot_resource', 'gdshader', 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-    auto_install = true,
+    auto_install = false,
     -- Install languages synchronously (only applied to `ensure_installed`)
     sync_install = false,
     -- List of parsers to ignore installing
@@ -1001,17 +850,6 @@ local on_attach = function(_, bufnr)
   end, { desc = 'Format current buffer with LSP' })
 end
 
--- document existing key chains
-require('which-key').add {
-    { "<leader>c", desc = "[C]ode" },
-    { "<leader>d", desc = "[D]ocument" },
-    { "<leader>r", desc = "[R]ename" },
-    { "<leader>s", desc = "[S]earch" },
-    { "<leader>w", desc = "[W]orkspace" },
-    { "<leader>t", desc = "[T]oggle" },
-    { "<leader>h", desc = "Git [H]unk", mode = { "n", "v" } },
-}
-
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
 require('mason').setup()
@@ -1038,18 +876,14 @@ local servers = {
       workspace = { checkThirdParty = false },
       telemetry = { enable = false },
       -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-      -- diagnostics = { disable = { 'missing-fields' } },
+      diagnostics = { disable = { 'missing-fields' } },
     },
   },
 }
 
--- Setup neovim lua configuration
-require('neodev').setup()
-
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
-require('lspconfig').gdscript.setup(capabilities)
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
@@ -1065,7 +899,6 @@ mason_lspconfig.setup_handlers {
       on_attach = on_attach,
       settings = servers[server_name],
       filetypes = (servers[server_name] or {}).filetypes,
-      disabled = true,
     }
   end,
 }
@@ -1074,13 +907,21 @@ local lspconfig = require('lspconfig')
 lspconfig.ols.setup({});
 
 lspconfig.clangd.setup{
+  on_attach = on_attach,
+  capabilities = capabilities,
   cmd = {
     "clangd",
+    "--all-scopes-completion",
     "--background-index",
     "--clang-tidy",
-    "--completion-style=detailed",
+    "--completion-parse=always",
+    -- "--completion-style=detailed",
+    "--completion-style=bundled",
+    "--cross-file-rename",
+    "--enable-config",
     "--function-arg-placeholders",
     "--header-insertion=never",
+    "-j=4",
   },
     diagnostics = {
         underline = true,
@@ -1121,7 +962,8 @@ cmp.setup {
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete {},
     ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
+      -- behavior = cmp.ConfirmBehavior.Replace,
+      behavior = cmp.ConfirmBehavior.Insert,
       select = true,
     },
     ['<Tab>'] = cmp.mapping(function(fallback)
@@ -1145,9 +987,13 @@ cmp.setup {
   },
   sources = {
     { name = 'nvim_lsp' },
+    { name = 'supermaven' },
     { name = 'luasnip' },
     { name = 'path' },
+    { name = 'buffer' },
   },
+
+  vim.api.nvim_set_hl(0, 'CmpItemKindSupermaven', { fg = "#44bdff" })
 }
 
 -- The line beneath this is called `modeline`. See `:help modeline`
