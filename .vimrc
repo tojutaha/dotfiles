@@ -144,9 +144,13 @@ if filereadable(expand("~/.vim/autoload/plug.vim"))
   Plug 'junegunn/fzf', {'do': {-> fzf#install()}}
   Plug 'junegunn/fzf.vim'
   Plug 'zackhsi/fzf-tags'
+  Plug 'junegunn/goyo.vim'
+  Plug 'junegunn/limelight.vim'
+  Plug 'mnishz/colorscheme-preview.vim'
   Plug 'ervandew/supertab'
   Plug 'mg979/vim-visual-multi', {'branch': 'master'}
   Plug 'tikhomirov/vim-glsl'
+  "Plug 'psliwka/vim-smoothie'
   call plug#end()
 
 endif
@@ -203,7 +207,8 @@ noremap <silent> <A-N> :cp<CR>
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
 " function keys
-map <F1> :set number!<CR> :set relativenumber!<CR>
+map <F1> :set number!<CR>
+"map <F1> :set number!<CR> :set relativenumber!<CR>
 set pastetoggle=<F3>
 map <F4> :set list!<CR>
 map <F5> :set cursorline!<CR>
@@ -242,4 +247,3 @@ nnoremap gd <C-]>
 " Move lines
 vnoremap J :m '>+1<CR>gv=gv
 vnoremap K :m '<-2<CR>gv=gv
-
