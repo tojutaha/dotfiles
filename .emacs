@@ -28,7 +28,7 @@
 (setq ediff-split-window-function 'split-window-horizontally)
 
 ; Bright-red TODOs etc.
- (setq fixme-modes '(c++-mode c-mode emacs-lisp-mode jai-mode))
+ (setq fixme-modes '(c++-mode c-mode emacs-lisp-mode))
  (make-face 'font-lock-fixme-face)
  (make-face 'font-lock-note-face)
  (make-face 'font-lock-important-face)
@@ -546,13 +546,31 @@
 (setq quelpa-update-melpa-p nil) ;; dont refresh recipes
 (setq quelpa-checkout-melpa-p nil) ;; dont git pull
 
-(defun my-run-jai (file)
-  "Run jai with FILE, defaulting to first.jai."
-  (interactive
-   (list (read-string "Run jai on file: " "first.jai")))
-  (compile (format "jai %s" file)))
-(global-set-key (kbd "C-b") 'my-run-jai)
+(defun my-compile-current-file ()
+  "Compile the current file depending on its extension.
+   Jai files → `jai`.
+   GLSL files (.vert.glsl, .frag.glsl, etc.) → `glslangValidator`."
+  (interactive)
+  (let* ((src (buffer-file-name))
+         (ext (file-name-extension src)))
+    (cond
+     ;; GLSL shaders → compile to .spv
+     ((and ext (string-match-p "glsl\\'" ext))
+      (let ((out (concat (file-name-sans-extension src) ".spv")))
+        (compile (format "glslangValidator %s -V -o %s" src out))))
 
+     ;; Jai sources → default to first.jai unless prompted
+     ((and ext (string= ext "jai"))
+      (let ((file (read-string "Run jai on file: " "first.jai")))
+        (compile (format "jai %s" file))))
+
+     ;; Unsupported file type
+     (t
+      (message "Don't know how to compile this file type: %s :(" ext)))))
+
+(global-set-key (kbd "C-b") 'my-compile-current-file)
+
+;;
 (define-prefix-command 'ctl-x-map)
 (global-set-key (kbd "C-x") 'ctl-x-map)
 (define-key ctl-x-map (kbd "0") 'delete-window)
