@@ -1,6 +1,5 @@
-  ;No startup message
+;No startup message
 (setq inhibit-startup-message t)
-
 ; Stop Emacs from losing undo information by
 ; setting very high limits for undo buffers
 (setq undo-limit 20000000)
@@ -12,7 +11,6 @@
 (setq enable-local-variables nil)
 ; no screwing with my middle mouse button
 (global-unset-key [mouse-2])
-
 ;autocompletion for find-files
 (load-library "view")
 (require 'cc-mode)
@@ -20,101 +18,17 @@
 (require 'compile)
 (ido-mode t)
 
-; Move both regions or individual lines
-(defun move-text-internal (arg)
-  (cond
-   ((and mark-active transient-mark-mode)
-    (if (> (point) (mark))
-        (exchange-point-and-mark))
-    (let ((column (current-column))
-          (text (delete-and-extract-region (point) (mark))))
-      (forward-line arg)
-      (move-to-column column t)
-      (set-mark (point))
-      (insert text)
-      (exchange-point-and-mark)
-      (setq deactivate-mark nil)))
-   (t
-    (let ((column (current-column)))
-      (beginning-of-line)
-      (when (or (> arg 0) (not (bobp)))
-        (forward-line)
-        (when (or (< arg 0) (not (eobp)))
-          (transpose-lines arg)
-          (when (and (eval-when-compile
-                       '(and (>= emacs-major-version 24)
-                             (>= emacs-minor-version 3)))
-                     (< arg 0))
-            (forward-line -1)))
-        (forward-line -1))
-      (move-to-column column t)))))
-
-(defun move-text-down (arg)
-  "Move region (transient-mark-mode active) or current line
-  arg lines down."
-  (interactive "*p")
-  (move-text-internal arg))
-
-(defun move-text-up (arg)
-  "Move region (transient-mark-mode active) or current line
-  arg lines up."
-  (interactive "*p")
-  (move-text-internal (- arg)))
-
-(global-set-key [M-S-up] 'move-text-up)
-(global-set-key [M-S-down] 'move-text-down)
-;;
-
 ; Setup my find-files
 (define-key global-map "\ef" 'find-file)
 (define-key global-map "\eF" 'find-file-other-window)
-
+; Switch buffers
 (global-set-key (read-kbd-macro "\eb")  'ido-switch-buffer)
 (global-set-key (read-kbd-macro "\eB")  'ido-switch-buffer-other-window)
-
-(defun casey-ediff-setup-windows (buffer-A buffer-B buffer-C control-buffer)
-  (ediff-setup-windows-plain buffer-A buffer-B buffer-C control-buffer)
-)
-(setq ediff-window-setup-function 'casey-ediff-setup-windows)
+; Split window
 (setq ediff-split-window-function 'split-window-horizontally)
 
-;Setup my compilation mode
-(defun casey-big-fun-compilation-hook ()
-  (make-local-variable 'truncate-lines)
-  (setq truncate-lines nil)
-)
-
-(add-hook 'compilation-mode-hook 'casey-big-fun-compilation-hook)
-
-(defun load-todo ()
-  (interactive)
-  (find-file casey-todo-file)
-)
-(define-key global-map "\et" 'load-todo)
-
-(defun insert-timeofday ()
-   (interactive "*")
-   (insert (format-time-string "---------------- %a, %d %b %y: %I:%M%p")))
-(defun load-log ()
-  (interactive)
-  (find-file casey-log-file)
-  (if (boundp 'longlines-mode) ()
-    (longlines-mode 1)
-    (longlines-show-hard-newlines))
-  (if (equal longlines-mode t) ()
-    (longlines-mode 1)
-    (longlines-show-hard-newlines))
-  (end-of-buffer)
-  (newline-and-indent)
-  (insert-timeofday)
-  (newline-and-indent)
-  (newline-and-indent)
-  (end-of-buffer)
-)
-(define-key global-map "\eT" 'load-log)
-
-; Bright-red TODOs
- (setq fixme-modes '(c++-mode c-mode emacs-lisp-mode))
+; Bright-red TODOs etc.
+ (setq fixme-modes '(c++-mode c-mode emacs-lisp-mode jai-mode))
  (make-face 'font-lock-fixme-face)
  (make-face 'font-lock-note-face)
  (make-face 'font-lock-important-face)
@@ -536,7 +450,7 @@
  '(mouse-wheel-progressive-speed nil)
  '(mouse-wheel-scroll-amount '(15))
  '(package-selected-packages
-   '(gruber-darker-theme yasnippet ccls use-package swiper naysayer-theme lsp-ui beacon avy))
+   '(gruber-darker-theme ccls use-package swiper naysayer-theme))
  '(version-control nil))
 
 (define-key global-map "\t" 'dabbrev-expand)
@@ -546,24 +460,7 @@
 (define-key global-map [C-tab] 'indent-region)
 (define-key global-map "	" 'indent-region)
 
-;;(add-to-list 'default-frame-alist '(font . "Fira Mono Medium-11"))
-;;(set-face-attribute 'default t :font "Fira Mono Medium-11")
-
-;;(add-to-list 'default-frame-alist '(font . "Liberation Mono-11.5"))
-;;(set-face-attribute 'default t :font "Liberation Mono-11.5")
-
-;;(add-to-list 'default-frame-alist '(font . "Fira Code-11.5"))
-;;(set-face-attribute 'default t :font "Fira Code-11.5")
-
-;;(set-face-attribute 'font-lock-builtin-face nil :foreground "#DAB98F")
-;;(set-face-attribute 'font-lock-comment-face nil :foreground "gray50")
-;;(set-face-attribute 'font-lock-constant-face nil :foreground "olive drab")
-;;(set-face-attribute 'font-lock-doc-face nil :foreground "gray50")
-;;(set-face-attribute 'font-lock-function-name-face nil :foreground "burlywood3")
-;;(set-face-attribute 'font-lock-keyword-face nil :foreground "DarkGoldenrod3")
-;;(set-face-attribute 'font-lock-string-face nil :foreground "olive drab")
-;;(set-face-attribute 'font-lock-type-face nil :foreground "burlywood3")
-;;(set-face-attribute 'font-lock-variable-name-face nil :foreground "burlywood3")
+(set-frame-font "Consolas-13.5" nil t)
 
 ;; Duplicate line
 (defun duplicate-line (arg)
@@ -602,55 +499,19 @@
   (next-line arg))
 
 (global-set-key (kbd "\eD") 'duplicate-line)
-;;(define-key global-map "\e_" 'lsp-find-declaration)
-;; end of duplicate line
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (package-initialize)
 
-;;(require 'lsp-mode)
-;;(add-hook 'js-mode-hook #'lsp)
-
-;(use-package lsp-mode
-;  :ensure t
-;  :hook ((c-mode c++-mode) . lsp)
-					;
-;config
-;  (setq lsp-clients-clangd-executable "/bin/clangd")
-;)
-
-;(use-package lsp-ui
-;  :ensure t)
-
-;(use-package lsp-mode :commands lsp)
-;(use-package lsp-ui :commands lsp-ui-mode)
-
-;(setq company-minimum-prefix-length 3)
-;(setq lsp-idle-delay 0.3)
-
-;(setq lsp-enabled-clients '(clangd))
-
-;(add-hook 'js-mode-hook #'lsp)
-
-;;(use-package ccls
-;;  :hook ((c-mode c++-mode objc-mode cuda-mode) .
-;;         (lambda () (require 'ccls) (lsp))))
-
-(setq package-selected-packages '(lsp-mode yasnippet lsp-treemacs helm-lsp
-    projectile hydra flycheck company avy which-key helm-xref dap-mode))
+(use-package ccls
+  :hook ((c-modec++-mode objc-mode cuda-mode) .
+         (lambda () (require 'ccls) (lsp))))
 
 (when (cl-find-if-not #'package-installed-p package-selected-packages)
   (package-refresh-contents)
   (mapc #'package-install package-selected-packages))
-
-;; sample `helm' configuration use https://github.com/emacs-helm/helm/ for details
-;;(helm-mode)
-;;(require 'helm-xref)
-;;(define-key global-map [remap find-file] #'helm-find-files)
-;;(define-key global-map [remap execute-extended-command] #'helm-M-x)
-;;(define-key global-map [remap switch-to-buffer] #'helm-mini)
 
 (which-key-mode)
 (add-hook 'c-mode-hook 'lsp)
@@ -661,15 +522,7 @@
       treemacs-space-between-root-nodes nil
       company-idle-delay 0.0
       company-minimum-prefix-length 1
-      lsp-idle-delay 0.1)  ;; clangd is fast
-
-(with-eval-after-load 'lsp-mode
-  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
-  (require 'dap-cpptools)
-  (yas-global-mode))
-
-(use-package avy
-  :ensure t)
+      lsp-idle-delay 0.1)
 
 (use-package swiper
   :ensure t
@@ -679,29 +532,45 @@
     (global-set-key "\C-s" 'swiper)
     ))
 
-;(use-package which-key
-;  :ensure t
-;  :config (which-key-mode))
-
-  ; Debugger
-  ;(require 'dap-lldb)
-  ;(require 'dap-cpptools)
-  ;(require 'dap-gdb-lldb)
-  ;(setq dap-auto-configure-features '(sessions locals controls tooltip))
-  ;(use-package realgud
-  ;  :ensure t)
-  ;(define-key global-map [f5] 'realgud:gdb)
-
 (global-company-mode 1)
-
-(beacon-mode 1)
-(setq beacon-push-mark 35)
-(setq beacon-color "#666600")
 
 (cua-mode 1)
 (show-paren-mode 1)
 
-;(yas-global-mode 1)
+(unless (package-installed-p 'quelpa-use-package)
+  (quelpa
+   '(quelpa-use-package
+     :fetcher git
+     :url "https://github.com/quelpa/quelpa-use-package.git")))
+(require 'quelpa-use-package)
+(setq quelpa-update-melpa-p nil) ;; dont refresh recipes
+(setq quelpa-checkout-melpa-p nil) ;; dont git pull
+
+(defun my-run-jai (file)
+  "Run jai with FILE, defaulting to first.jai."
+  (interactive
+   (list (read-string "Run jai on file: " "first.jai")))
+  (compile (format "jai %s" file)))
+(global-set-key (kbd "C-b") 'my-run-jai)
+
+(define-prefix-command 'ctl-x-map)
+(global-set-key (kbd "C-x") 'ctl-x-map)
+(define-key ctl-x-map (kbd "0") 'delete-window)
+(define-key ctl-x-map (kbd "1") 'delete-other-windows)
+
+(use-package jai-mode
+  :quelpa (jai-mode :fetcher github :repo "elp-revive/jai-mode"))
+
+(use-package eglot
+  :defer t
+  :custom
+  (eglot-ignored-server-capabilities '(:documentHighlightProvider))
+  (eglot-events-buffer-size 0)
+  :config
+  (add-to-list
+   'eglot-server-programs
+   '(jai-mode . ("jails.exe" "-jai_path" "W:/apps/jai/bin/jai.exe"))))
+(require 'eglot)
 
 ;; zoom in/out like we do everywhere else.
 (global-set-key (kbd "C-+") 'text-scale-increase)
